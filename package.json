@@ -1,0 +1,31 @@
+{
+  "name": "moneymind",
+  "private": true,
+  "workspaces": [
+    "frontend/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "check": "oxlint",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "oxlint": "^1.8.0",
+    "turbo": "^2.5.4"
+  },
+  "lint-staged": {
+    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "oxlint"
+  },
+  "packageManager": "bun@1.1.34"
+}
