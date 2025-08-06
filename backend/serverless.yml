@@ -1,67 +1,79 @@
+# Remove any "org" or "app" fields if present
 service: moneymind-api
 
 provider:
   name: aws
   runtime: nodejs20.x
-  region: ap-southeast-5  # Malaysia region
+  region: ap-southeast-5
   stage: ${opt:stage, 'dev'}
-  memorySize: 256
-  timeout: 29
-  # iam:
-  #   role:
-  #     statements:
-  #       - Effect: Allow
-  #         Action:
-  #           - dynamodb:Query
-  #           - dynamodb:Scan
-  #           - dynamodb:GetItem
-  #           - dynamodb:PutItem
-  #           - dynamodb:UpdateItem
-  #           - dynamodb:DeleteItem
-  #         Resource:
-  #           - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.EXPENSES_TABLE}"
-  #           - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
-  #       - Effect: Allow
-  #         Action:
-  #           - s3:GetObject
-  #           - s3:PutObject
-  #           - s3:DeleteObject
-  #         Resource:
-  #           - "arn:aws:s3:::${self:provider.environment.UPLOADS_BUCKET}/*"
-  #       - Effect: Allow
-  #         Action:
-  #           - sqs:SendMessage
-  #           - sqs:ReceiveMessage
-  #           - sqs:DeleteMessage
-  #         Resource:
-  #           - "arn:aws:sqs:${self:provider.region}:*:${self:provider.environment.CSV_QUEUE}"
-  #       - Effect: Allow
-  #         Action:
-  #           - sns:Publish
-  #         Resource:
-  #           - "arn:aws:sns:${self:provider.region}:*:${self:service}-alerts-${self:provider.stage}"
 
 functions:
-  api:
-    handler: src/api/handler.main
+  root:
+    handler: src/handler/main.main
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+
+  # Expenses endpoints
+  getExpenses:
+    handler: src/handler/expenses.getExpenses
+    events:
+      - http:
+          path: /api/expenses
+          method: get
+          cors: true
+
+  getExpense:
+    handler: src/handler/expenses.getExpense
+    events:
+      - http:
+          path: /api/expenses/{id}
+          method: get
+          cors: true
+
+  createExpense:
+    handler: src/handler/expenses.createExpense
+    events:
+      - http:
+          path: /api/expenses
+          method: post
+          cors: true
+
+  updateExpense:
+    handler: src/handler/expenses.updateExpense
+    events:
+      - http:
+          path: /api/expenses/{id}
+          method: put
+          cors: true
+
+  deleteExpense:
+    handler: src/handler/expenses.deleteExpense
+    events:
+      - http:
+          path: /api/expenses/{id}
+          method: delete
+          cors: true
+
+  bulkCreateExpenses:
+    handler: src/handler/expenses.bulkCreateExpenses
+    events:
+      - http:
+          path: /api/expenses/bulk
+          method: post
+          cors: true
+
+  # OPTIONS handler for CORS preflight
+  options:
+    handler: src/handler/options.handleOptions
     events:
       - http:
           path: /{proxy+}
-          method: ANY
+          method: options
           cors: true
-      - http:
-          path: /
-          method: ANY
-          cors: true
-          
+
 plugins:
   - serverless-esbuild
   - serverless-dotenv-plugin
-
-custom:
-  serverless-offline:
-    httpPort: 3003
-    host: 0.0.0.0
-  # Stage-based development for team collaboration
-  tableName: ${self:service}-expenses-${self:provider.stage}
-  bucketName: ${self:service}-uploads-${self:provider.stage}
