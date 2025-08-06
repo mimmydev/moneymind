@@ -1,0 +1,46 @@
+{
+  "name": "moneymind-backend",
+  "version": "1.0.0",
+  "description": "MoneyMind serverless backend - Personal finance tracker with intelligent categorization",
+  "main": "src/api/handler.js",
+  "type": "module",
+  "scripts": {
+    "dev": "serverless offline start",
+    "test-server": "node test-server.js",
+    "deploy": "serverless deploy",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "logs": "serverless logs -f api -t",
+    "remove": "serverless remove",
+    "test": "jest",
+    "invoke:local": "serverless invoke local -f api"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1691.0",
+    "csv-parser": "^3.0.0",
+    "uuid": "^10.0.0",
+    "lambda-api": "^0.10.7",
+    "joi": "^17.13.3",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+     "serverless": "^3.40.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/uuid": "^10.0.0",
+    "@types/minimatch": "^6.0.0",
+    "@types/node": "^24.1.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-esbuild": "^1.55.1"
+  },
+  "keywords": [
+    "serverless",
+    "aws",
+    "lambda",
+    "personal-finance",
+    "expense-tracker",
+    "nodejs"
+  ],
+  "author": "MoneyMind Team",
+  "license": "MIT"
+}

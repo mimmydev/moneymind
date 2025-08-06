@@ -1,0 +1,67 @@
+service: moneymind-api
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-southeast-5  # Malaysia region
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 29
+  # iam:
+  #   role:
+  #     statements:
+  #       - Effect: Allow
+  #         Action:
+  #           - dynamodb:Query
+  #           - dynamodb:Scan
+  #           - dynamodb:GetItem
+  #           - dynamodb:PutItem
+  #           - dynamodb:UpdateItem
+  #           - dynamodb:DeleteItem
+  #         Resource:
+  #           - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.EXPENSES_TABLE}"
+  #           - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
+  #       - Effect: Allow
+  #         Action:
+  #           - s3:GetObject
+  #           - s3:PutObject
+  #           - s3:DeleteObject
+  #         Resource:
+  #           - "arn:aws:s3:::${self:provider.environment.UPLOADS_BUCKET}/*"
+  #       - Effect: Allow
+  #         Action:
+  #           - sqs:SendMessage
+  #           - sqs:ReceiveMessage
+  #           - sqs:DeleteMessage
+  #         Resource:
+  #           - "arn:aws:sqs:${self:provider.region}:*:${self:provider.environment.CSV_QUEUE}"
+  #       - Effect: Allow
+  #         Action:
+  #           - sns:Publish
+  #         Resource:
+  #           - "arn:aws:sns:${self:provider.region}:*:${self:service}-alerts-${self:provider.stage}"
+
+functions:
+  api:
+    handler: src/api/handler.main
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+      - http:
+          path: /
+          method: ANY
+          cors: true
+          
+plugins:
+  - serverless-esbuild
+  - serverless-dotenv-plugin
+
+custom:
+  serverless-offline:
+    httpPort: 3003
+    host: 0.0.0.0
+  # Stage-based development for team collaboration
+  tableName: ${self:service}-expenses-${self:provider.stage}
+  bucketName: ${self:service}-uploads-${self:provider.stage}
