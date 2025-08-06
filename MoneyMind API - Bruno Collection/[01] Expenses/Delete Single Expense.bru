@@ -1,0 +1,15 @@
+meta {
+  name: Delete Single Expense
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}{{api}}/expenses/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 
+}
