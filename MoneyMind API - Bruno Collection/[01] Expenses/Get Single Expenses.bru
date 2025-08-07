@@ -5,11 +5,70 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}{{apiPath}}/expenses/:id
-  body: none
+  url: {{baseUrl}}{{apiPath}}/expenses/:id?date=YYYY-MM-00
+  body: json
   auth: none
+}
+
+params:query {
+  date: YYYY-MM-00
 }
 
 params:path {
   id: 
+}
+
+docs {
+  ## **GET /api/expenses/{id}** - Get Single Expense
+  **Retrieve a specific expense by ID and date**
+  
+  ### Bruno Configuration:
+  - **Method:** GET
+  - **URL:** `{{baseUrl}}/api/expenses/:id`
+  - **Query Parameters (Required):**
+    - `date`: `2024-08-07` (YYYY-MM-DD format)
+  
+  ### Example URL:
+  ```
+  {{baseUrl}}/{{apiPath}}/expenses/exp_1754551220825_yc1isu2ro?date=2024-08-07
+  ```
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "expense": {
+        "id": "exp_1754551220825_yc1isu2ro",
+        "description": "Nasi Kandar Pelita",
+        "amount": 1250,
+        "amountMYR": "RM 12.50",
+        "category": "food_mamak",
+        "date": "2024-08-07",
+        "merchant": "Pelita Nasi Kandar",
+        "location": "Kuala Lumpur",
+        "confidence": 95,
+        "createdAt": "2024-08-07T07:20:20.825Z",
+        "updatedAt": "2024-08-07T07:20:20.825Z"
+      }
+    },
+    "message": "Expense retrieved successfully"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Required Parameters:**
+  - Path parameter: expense ID
+  - Query parameter: date (YYYY-MM-DD)
+  
+  **How to get these values:**
+  1. First call GET /api/expenses to get all expenses
+  2. Copy the "id" field (e.g., exp_1754551220825_yc1isu2ro)
+  3. Copy the "date" field (e.g., 2024-08-07)
+  4. Use both in this endpoint
+  
+  **Why both ID and date?**
+  DynamoDB requires both partition key (USER#userId) and sort key (EXPENSE#date#id) for single item retrieval.
+  ```
 }

@@ -1,0 +1,69 @@
+meta {
+  name: Update Expense
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}{{apiPath}}/expenses/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+docs {
+  ## **PUT /api/expenses/{id}** - Update Expense
+  **Update an existing expense**
+  
+  ### Bruno Configuration:
+  - **Method:** PUT
+  - **URL:** `{{baseUrl}}/{{apiPath}}/expenses/:id`
+  - **Query Parameters (Required):**
+    - `date`: `2024-08-07`
+  - **Headers:**
+    - `Content-Type: application/json`
+  - **Body (JSON):**
+  ```json
+  {
+    "description": "Nasi Kandar Pelita (Updated)",
+    "amount": 1350,
+    "merchant": "Pelita Restaurant",
+    "notes": "Spicy curry"
+  }
+  ```
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "expense": {
+        "id": "exp_1754551220825_yc1isu2ro",
+        "description": "Nasi Kandar Pelita (Updated)",
+        "amount": 1350,
+        "amountMYR": "RM 13.50",
+        "updatedAt": "2024-08-07T08:15:30.123Z"
+      }
+    },
+    "message": "Expense updated successfully"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Required URL Parameters:**
+  - Path: expense ID
+  - Query: date (YYYY-MM-DD)
+  
+  **Body Fields (all optional):**
+  - Any field from create expense can be updated
+  - Only include fields you want to change
+  
+  **Notes:**
+  - updatedAt timestamp is automatically set
+  - Amount validation same as create (integer cents)
+  ```
+}

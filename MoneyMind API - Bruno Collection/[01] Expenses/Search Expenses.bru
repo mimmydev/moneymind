@@ -1,0 +1,68 @@
+meta {
+  name: Search Expenses
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}{{apiPath}}/expenses/search?q=Nasi
+  body: none
+  auth: none
+}
+
+params:query {
+  q: Nasi
+}
+
+docs {
+  ## **GET /api/expenses/search** - Search Expenses  
+  **Search expenses by description (case-sensitive)**
+  
+  ### Bruno Configuration:
+  - **Method:** GET
+  - **URL:** `{{baseUrl}}/api/expenses/search`
+  - **Query Parameters (Required):**
+    - `q`: `Nasi` (search term, minimum 2 characters, case-sensitive)
+  
+  ### Example URLs:
+  ```
+  {{baseUrl}}/api/expenses/search?q=Nasi
+  {{baseUrl}}/api/expenses/search?q=Grab
+  {{baseUrl}}/api/expenses/search?q=Starbucks
+  ```
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "expenses": [
+        {
+          "id": "exp_1754551220825_yc1isu2ro",
+          "description": "Nasi Kandar Pelita",
+          "amount": 1250,
+          "amountMYR": "RM 12.50",
+          "category": "food_mamak",
+          "date": "2024-08-07"
+        }
+      ],
+      "searchTerm": "Nasi",
+      "count": 1
+    },
+    "message": "Found 1 expenses matching \"Nasi\""
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Important Notes:**
+  - Case-sensitive search: "nasi" ≠ "Nasi"
+  - Minimum 2 characters required
+  - Searches in description field only
+  - Uses DynamoDB Scan (slower for large datasets)
+  
+  **Tips:**
+  - Try "Nasi", "Grab", "Starbucks", "Touch"
+  - Use exact case from your expense descriptions
+  ```
+}
