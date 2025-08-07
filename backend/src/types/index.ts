@@ -133,6 +133,9 @@ export interface ExpenseItem extends DynamoDBItem, Expense {
   //** GSI fields for category-based queries
   GSI1PK: string  //** Format: "USER#{userId}#CATEGORY#{category}"
   GSI1SK: string  //** Format: "{date}#{expenseId}"
+
+  //** Search optimization fields
+  description_lowercase: string  //** Lowercase version for case-insensitive search
 }
 
 //** User profile item in DynamoDB

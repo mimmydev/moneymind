@@ -58,6 +58,9 @@ export class ExpenseRepository {
       GSI1PK: `USER#${userId}#CATEGORY#${category}`,
       GSI1SK: `${date}#${expenseId}`,
       
+      //** Search optimization fields
+      description_lowercase: expenseData.description.toLowerCase(),
+      
       //** Expense data
       id: expenseId,
       userId,
@@ -113,6 +116,7 @@ export class ExpenseRepository {
             Type: 'EXPENSE',
             GSI1PK: `USER#${userId}#CATEGORY#${category}`,
             GSI1SK: `${date}#${expenseId}`,
+            description_lowercase: expenseData.description.toLowerCase(),
             id: expenseId,
             userId,
             description: expenseData.description,
@@ -275,9 +279,10 @@ export class ExpenseRepository {
     const expressionAttributeNames: any = {}
     
     if (updates.description !== undefined) {
-      updateExpressions.push('#desc = :description')
+      updateExpressions.push('#desc = :description, description_lowercase = :descriptionLower')
       expressionAttributeNames['#desc'] = 'description'
       expressionAttributeValues[':description'] = updates.description
+      expressionAttributeValues[':descriptionLower'] = updates.description.toLowerCase()
     }
     
     if (updates.amount !== undefined) {
@@ -363,29 +368,26 @@ export class ExpenseRepository {
   // ========================================
   
   /**
-   * Search expenses by description (MVP approach - not optimal for production)
+   * Search expenses by description (Database-level filtering)
    * Frontend Analogy: Like filtering an array, but we're filtering in the database
    */
   async searchExpensesByDescription(userId: string, searchTerm: string, limit: number = 20): Promise<Expense[]> {
-    //** WARNING: This uses Scan which is expensive - fine for MVP, optimize later
-    //** For case-insensitive search, we'll get all items and filter in memory (MVP approach)
-    const result = await dynamodb.send(new ScanCommand({
+    //** Use Query instead of Scan for better performance
+    //** Filter at database level using the description_lowercase field
+    const result = await dynamodb.send(new QueryCommand({
       TableName: TABLE_NAME,
-      FilterExpression: 'PK = :pk AND attribute_exists(description)',
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      FilterExpression: 'contains(description_lowercase, :searchTerm)',
       ExpressionAttributeValues: {
-        ':pk': `USER#${userId}`
-      }
+        ':pk': `USER#${userId}`,
+        ':sk': 'EXPENSE#',
+        ':searchTerm': searchTerm.toLowerCase()
+      },
+      ScanIndexForward: false, //** Sort by date descending (newest first)
+      Limit: limit
     }))
     
-    //** Filter in memory for case-insensitive search (MVP approach)
-    const allExpenses = result.Items?.map(item => this.itemToExpense(item as ExpenseItem)) || []
-    const lowerSearchTerm = searchTerm.toLowerCase()
-    
-    const filteredExpenses = allExpenses.filter(expense => 
-      expense.description.toLowerCase().includes(lowerSearchTerm)
-    ).slice(0, limit)
-    
-    return filteredExpenses
+    return result.Items?.map(item => this.itemToExpense(item as ExpenseItem)) || []
   }
 
   // ========================================
