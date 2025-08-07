@@ -5,13 +5,17 @@ meta {
 }
 
 delete {
-  url: {{baseUrl}}{{apiPath}}/expenses/:id
+  url: {{baseUrl}}{{apiPath}}/expenses/:id?date=YYYY-MM-DD
   body: none
   auth: none
 }
 
+params:query {
+  date: YYYY-MM-DD
+}
+
 params:path {
-  id: exp_1754551722818_z5ka9ecva
+  id: 
 }
 
 docs {
