@@ -8,8 +8,8 @@ export const main = async (event: any) => {
         'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({
-        message: 'Welcome to MoneyMind API'
-      })
+        message: 'Welcome to MoneyMind API',
+      }),
     };
   } catch (error) {
     return {
@@ -21,8 +21,8 @@ export const main = async (event: any) => {
       body: JSON.stringify({
         success: false,
         message: 'Internal server error',
-        error: error.message
-      })
+        error: error.message,
+      }),
     };
   }
 };

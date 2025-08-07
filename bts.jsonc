@@ -9,18 +9,12 @@
   "orm": "none",
   "backend": "none",
   "runtime": "none",
-  "frontend": [
-    "nuxt"
-  ],
-  "addons": [
-    "husky",
-    "oxlint",
-    "turborepo"
-  ],
+  "frontend": ["nuxt"],
+  "addons": ["husky", "oxlint", "turborepo"],
   "examples": [],
   "auth": false,
   "packageManager": "bun",
   "dbSetup": "none",
   "api": "none",
-  "webDeploy": "none"
+  "webDeploy": "none",
 }

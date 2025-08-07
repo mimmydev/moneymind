@@ -19,7 +19,6 @@ First, install the dependencies:
 bun install
 ```
 
-
 Then, run the development server:
 
 ```bash
@@ -27,8 +26,6 @@ bun dev
 ```
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-
-
 
 ## Project Structure
 
@@ -51,21 +48,24 @@ This project uses [shadcn-vue](https://www.shadcn-vue.com/) for UI components. C
 
 ### Adding new components:
 
-
 # Navigate to the web app directory
+
 ```bash
 cd frontend/web
 ```
 
 # Add a specific component
+
 bunx shadcn-vue@latest add [component-name]
 
 # Example: Add a dialog component
+
 ```bash
 bunx shadcn-vue@latest add dialog
 ```
 
 ### Using components:
+
 Thanks to Nuxt's auto-import feature, you can use shadcn-vue components directly in your templates:
 
 ```vue

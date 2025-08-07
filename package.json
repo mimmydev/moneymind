@@ -9,6 +9,8 @@
   "scripts": {
     "prepare": "husky",
     "check": "oxlint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
@@ -23,10 +25,15 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "oxlint": "^1.8.0",
+    "prettier": "^3.6.2",
     "turbo": "^2.5.4"
   },
   "lint-staged": {
-    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "oxlint"
+    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": [
+      "prettier --write",
+      "oxlint"
+    ],
+    "**/*.{json,md,yml,yaml,css,scss,html}": "prettier --write"
   },
   "packageManager": "bun@1.1.34"
 }

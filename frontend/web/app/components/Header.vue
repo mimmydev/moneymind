@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import ModeToggle from './ModeToggle.vue'
+import ModeToggle from './ModeToggle.vue';
 
-const links = [
-    { to: "/", label: "Home" },
-];
+const links = [{ to: '/', label: 'Home' }];
 </script>
 
 <template>

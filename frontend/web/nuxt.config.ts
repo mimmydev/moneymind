@@ -1,5 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineNuxtConfig({
   compatibilityDate: 'latest',
@@ -14,21 +14,19 @@ export default defineNuxtConfig({
      * Directory that the component lives in.
      * @default "./components/ui"
      */
-    componentDir: './app/components/ui'
+    componentDir: './app/components/ui',
   },
   css: ['~/assets/css/main.css'],
   vite: {
-    plugins: [
-      tailwindcss(),
-    ],
+    plugins: [tailwindcss()],
   },
   devServer: {
-    port: 3001
+    port: 3001,
   },
   ssr: false,
   runtimeConfig: {
     public: {
       serverURL: process.env.NUXT_PUBLIC_SERVER_URL,
-    }
-  }
-})
+    },
+  },
+});
