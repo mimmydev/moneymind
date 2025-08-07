@@ -1,0 +1,98 @@
+meta {
+  name: Create a Single Expense
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}{{apiPath}}/expenses
+  body: none
+  auth: none
+}
+
+docs {
+  ## **POST /api/expenses** - Create Expense
+  **Create a new expense**
+  
+  ### Bruno Configuration:
+  - **Method:** POST
+  - **URL:** `{{baseUrl}}/api/expenses`
+  - **Headers:** 
+    - `Content-Type: application/json`
+  - **Body (JSON):**
+  ```json
+  {
+    "description": "Mamak Teh Tarik",
+    "amount": 350,
+    "merchant": "Restoran Mamak",
+    "location": "Petaling Jaya"
+  }
+  ```
+  
+  ### More Examples:
+  ```json
+  {
+    "description": "Grab ride to Mid Valley",
+    "amount": 1200,
+    "merchant": "Grab",
+    "paymentMethod": "grabpay"
+  }
+  ```
+  
+  ```json
+  {
+    "description": "Petronas fuel",
+    "amount": 6000,
+    "merchant": "Petronas Station",
+    "category": "transport_fuel",
+    "date": "2024-08-07"
+  }
+  ```
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "expense": {
+        "id": "exp_1754551234567_abc123",
+        "description": "Mamak Teh Tarik", 
+        "amount": 350,
+        "amountMYR": "RM 3.50",
+        "category": "food_mamak",
+        "confidence": 95,
+        "date": "2024-08-07",
+        "merchant": "Restoran Mamak",
+        "location": "Petaling Jaya"
+      }
+    },
+    "message": "Expense created successfully: RM 3.50 for Mamak Teh Tarik"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Required Fields:**
+  - description: string (not empty)
+  - amount: integer in cents (1050 = RM 10.50)
+  
+  **Optional Fields:**
+  - merchant: string
+  - location: string  
+  - category: Malaysian category (will auto-detect if not provided)
+  - date: YYYY-MM-DD (defaults to today)
+  - paymentMethod: Malaysian payment methods
+  - notes: string
+  
+  **Amount Format:**
+  - Send as integer in cents
+  - RM 10.50 = 1050
+  - RM 3.50 = 350
+  
+  **Auto-categorization:**
+  - "Nasi Kandar" → food_mamak
+  - "Grab" → transport_grab  
+  - "Starbucks" → food_coffee
+  - "Petronas" → transport_fuel
+  ```
+}

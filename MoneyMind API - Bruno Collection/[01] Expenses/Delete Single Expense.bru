@@ -5,11 +5,41 @@ meta {
 }
 
 delete {
-  url: {{baseUrl}}{{api}}/expenses/:id
+  url: {{baseUrl}}{{apiPath}}/expenses/:id
   body: none
   auth: none
 }
 
 params:path {
-  id: 
+  id: exp_1754551722818_z5ka9ecva
+}
+
+docs {
+  ## **DELETE /api/expenses/{id}** - Delete Expense
+  **Delete an expense**
+  
+  ### Bruno Configuration:
+  - **Method:** DELETE
+  - **URL:** `{{baseUrl}}/{{apiPath}}/expenses/:id`
+  - **Query Parameters (Required):**
+    - `date`: `2024-08-07`
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "message": "Expense deleted successfully"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Required URL Parameters:**
+  - Path: expense ID  
+  - Query: date (YYYY-MM-DD)
+  
+  **Warning:**
+  - This action cannot be undone
+  - Expense is permanently removed from database
+  ```
 }
