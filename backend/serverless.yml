@@ -3,15 +3,15 @@ service: moneymind-api
 provider:
   name: aws
   runtime: nodejs20.x
-  region: ap-southeast-5  # Malaysia
+  region: ap-southeast-5
   stage: ${opt:stage, 'dev'}
-  
+
   # Environment variables for all functions
   environment:
     DYNAMODB_TABLE: ${self:service}-${self:provider.stage}-expenses
     STAGE: ${self:provider.stage}
     REGION: ${self:provider.region}
-  
+
   # IAM permissions for DynamoDB
   iam:
     role:
@@ -26,9 +26,18 @@ provider:
             - dynamodb:DeleteItem
             - dynamodb:BatchWriteItem
             - dynamodb:BatchGetItem
+            - kms:Decrypt
+            - kms:DescribeKey
           Resource:
-            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
-            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}/index/*"
+            - 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
+            - 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}/index/*'
+            - 'arn:aws:kms:${self:provider.region}:*:key/*'
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+            - kms:DescribeKey
+          Resource:
+            - 'arn:aws:kms:${self:provider.region}:*:key/*'
 
 functions:
   root:
@@ -72,8 +81,8 @@ functions:
           method: put
           cors: true
 
-  deleteExpense:
-    handler: src/handler/expenses.deleteExpense
+  destroyExpense:
+    handler: src/handler/expenses.destroyExpense
     events:
       - http:
           path: /api/expenses/{id}
@@ -126,46 +135,46 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.DYNAMODB_TABLE}
-        BillingMode: PROVISIONED  # Perfect for MVP
-        ProvisionedThroughput:      # Required for PROVISIONED mode
-              ReadCapacityUnits: 1  
-              WriteCapacityUnits: 1
-        
+        BillingMode: PROVISIONED # Perfect for MVP
+        ProvisionedThroughput: # Required for PROVISIONED mode
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
         # Primary Key Structure
         AttributeDefinitions:
-          - AttributeName: PK    # Partition Key: USER#{userId}
+          - AttributeName: PK # Partition Key: USER#{userId}
             AttributeType: S
-          - AttributeName: SK    # Sort Key: EXPENSE#{date}#{expenseId} or USER#{userId}
+          - AttributeName: SK # Sort Key: EXPENSE#{date}#{expenseId} or USER#{userId}
             AttributeType: S
-          - AttributeName: GSI1PK  # Global Secondary Index 1 - Category queries
+          - AttributeName: GSI1PK # Global Secondary Index 1 - Category queries
             AttributeType: S
-          - AttributeName: GSI1SK  # GSI1 Sort Key - Date for category-based date ranges
+          - AttributeName: GSI1SK # GSI1 Sort Key - Date for category-based date ranges
             AttributeType: S
-        
+
         KeySchema:
           - AttributeName: PK
-            KeyType: HASH      # Partition key
+            KeyType: HASH # Partition key
           - AttributeName: SK
-            KeyType: RANGE     # Sort key
-        
+            KeyType: RANGE # Sort key
+
         # Global Secondary Index for category-based queries
         GlobalSecondaryIndexes:
           - IndexName: CategoryDateIndex
             KeySchema:
-              - AttributeName: GSI1PK    # Format: USER#{userId}#CATEGORY#{category}
+              - AttributeName: GSI1PK # Format: USER#{userId}#CATEGORY#{category}
                 KeyType: HASH
-              - AttributeName: GSI1SK    # Format: {date}#{expenseId}
+              - AttributeName: GSI1SK # Format: {date}#{expenseId}
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:      # Required for PROVISIONED mode
-              ReadCapacityUnits: 2      # GSI needs its own capacity (conservative)
+            ProvisionedThroughput: # Required for PROVISIONED mode
+              ReadCapacityUnits: 2 # GSI needs its own capacity (conservative)
               WriteCapacityUnits: 2
-        
+
         # Point-in-time recovery for data protection
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
-        
+
         # Tags for cost tracking
         Tags:
           - Key: Service
@@ -185,7 +194,7 @@ resources:
         Ref: MoneyMindTable
       Export:
         Name: ${self:service}-${self:provider.stage}-table-name
-    
+
     MoneyMindTableArn:
       Description: DynamoDB table ARN
       Value:
