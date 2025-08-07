@@ -105,14 +105,14 @@ functions:
           method: post
           cors: true
 
-  # TODO: Analytics endpoint for dashboard
-  # getAnalytics:
-  #   handler: src/handler/analytics.getAnalytics
-  #   events:
-  #     - http:
-  #         path: /api/analytics
-  #         method: get
-  #         cors: true
+  # Analytics endpoint for dashboard
+  getAnalytics:
+    handler: src/handler/analytics.getAnalytics
+    events:
+      - http:
+          path: /api/analytics
+          method: get
+          cors: true
 
   # OPTIONS handler for CORS preflight
   options:
