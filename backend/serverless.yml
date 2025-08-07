@@ -1,11 +1,34 @@
-# Remove any "org" or "app" fields if present
 service: moneymind-api
 
 provider:
   name: aws
   runtime: nodejs20.x
-  region: ap-southeast-5
+  region: ap-southeast-5  # Malaysia
   stage: ${opt:stage, 'dev'}
+  
+  # Environment variables for all functions
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}-expenses
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+  
+  # IAM permissions for DynamoDB
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:BatchWriteItem
+            - dynamodb:BatchGetItem
+          Resource:
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}/index/*"
 
 functions:
   root:
@@ -57,6 +80,14 @@ functions:
           method: delete
           cors: true
 
+  searchExpenses:
+    handler: src/handler/expenses.searchExpenses
+    events:
+      - http:
+          path: /api/expenses/search
+          method: get
+          cors: true
+
   bulkCreateExpenses:
     handler: src/handler/expenses.bulkCreateExpenses
     events:
@@ -64,6 +95,15 @@ functions:
           path: /api/expenses/bulk
           method: post
           cors: true
+
+  # TODO: Analytics endpoint for dashboard
+  # getAnalytics:
+  #   handler: src/handler/analytics.getAnalytics
+  #   events:
+  #     - http:
+  #         path: /api/analytics
+  #         method: get
+  #         cors: true
 
   # OPTIONS handler for CORS preflight
   options:
@@ -77,3 +117,78 @@ functions:
 plugins:
   - serverless-esbuild
   - serverless-dotenv-plugin
+
+# DynamoDB Resources
+resources:
+  Resources:
+    # Main table for all MoneyMind data
+    MoneyMindTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        BillingMode: PROVISIONED  # Perfect for MVP
+        ProvisionedThroughput:      # Required for PROVISIONED mode
+              ReadCapacityUnits: 1  
+              WriteCapacityUnits: 1
+        
+        # Primary Key Structure
+        AttributeDefinitions:
+          - AttributeName: PK    # Partition Key: USER#{userId}
+            AttributeType: S
+          - AttributeName: SK    # Sort Key: EXPENSE#{date}#{expenseId} or USER#{userId}
+            AttributeType: S
+          - AttributeName: GSI1PK  # Global Secondary Index 1 - Category queries
+            AttributeType: S
+          - AttributeName: GSI1SK  # GSI1 Sort Key - Date for category-based date ranges
+            AttributeType: S
+        
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH      # Partition key
+          - AttributeName: SK
+            KeyType: RANGE     # Sort key
+        
+        # Global Secondary Index for category-based queries
+        GlobalSecondaryIndexes:
+          - IndexName: CategoryDateIndex
+            KeySchema:
+              - AttributeName: GSI1PK    # Format: USER#{userId}#CATEGORY#{category}
+                KeyType: HASH
+              - AttributeName: GSI1SK    # Format: {date}#{expenseId}
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:      # Required for PROVISIONED mode
+              ReadCapacityUnits: 2      # GSI needs its own capacity (conservative)
+              WriteCapacityUnits: 2
+        
+        # Point-in-time recovery for data protection
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        
+        # Tags for cost tracking
+        Tags:
+          - Key: Service
+            Value: MoneyMind
+          - Key: Environment
+            Value: ${self:provider.stage}
+          - Key: Region
+            Value: Malaysia
+          - Key: Currency
+            Value: MYR
+
+  # CloudFormation Outputs
+  Outputs:
+    MoneyMindTableName:
+      Description: DynamoDB table name
+      Value:
+        Ref: MoneyMindTable
+      Export:
+        Name: ${self:service}-${self:provider.stage}-table-name
+    
+    MoneyMindTableArn:
+      Description: DynamoDB table ARN
+      Value:
+        Fn::GetAtt: [MoneyMindTable, Arn]
+      Export:
+        Name: ${self:service}-${self:provider.stage}-table-arn
