@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}{{apiPath}}/expenses/search?q=Nasi
+  url: {{baseUrl}}{{apiPath}}/expenses/search?q=nasi ayam
   body: none
   auth: none
 }
 
 params:query {
-  q: Nasi
+  q: nasi ayam
 }
 
 docs {
@@ -56,10 +56,10 @@ docs {
   ### Bruno Documentation:
   ```markdown
   **Important Notes:**
-  - Case-sensitive search: "nasi" ≠ "Nasi"
   - Minimum 2 characters required
   - Searches in description field only
-  - Uses DynamoDB Scan (slower for large datasets)
+  - Uses `Query` to efficiently find user expenses, then filters at database level
+  
   
   **Tips:**
   - Try "Nasi", "Grab", "Starbucks", "Touch"
