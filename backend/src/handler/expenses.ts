@@ -8,45 +8,7 @@ import {
   BulkCreateExpensesRequest,
   APIResponse,
 } from '../types';
-
-/**
- * GET /api/expenses/search?q=searchTerm
- * Search expenses by description
- */
-export const searchExpenses = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  try {
-    const userId = getUserId(event);
-    const searchTerm = event.queryStringParameters?.q;
-
-    if (!searchTerm || searchTerm.trim().length < 2) {
-      return createResponse(400, {
-        success: false,
-        error: 'Search term must be at least 2 characters',
-      });
-    }
-
-    //** Search expenses using repository
-    const expenses = await expenseRepository.searchExpensesByDescription(userId, searchTerm.trim());
-
-    return createResponse(200, {
-      success: true,
-      data: {
-        expenses,
-        searchTerm,
-        count: expenses.length,
-      },
-      message: `Found ${expenses.length} expenses matching "${searchTerm}"`,
-    });
-  } catch (error) {
-    console.error('Error searching expenses:', error);
-    return createResponse(500, {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to search expenses',
-    });
-  }
-};
+import { parseCSVToExpenses } from '../helper/expenses';
 
 // ========================================
 //** UTILITY FUNCTIONS
@@ -463,57 +425,136 @@ export const bulkCreateExpenses = async (
   }
 };
 
-// ========================================
-//** MALAYSIAN DEMO DATA HELPER
-// ========================================
+/**
+ * POST /api/expenses/csv
+ * Parse CSV file and create expenses using existing bulk logic
+ */
+
+export const uploadCSV = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  try {
+    const userId = getUserId(event);
+
+    //** Parse multipart form data (CSV file)
+    const csvContent = await parseCSVFromEvent(event);
+
+    if (!csvContent) {
+      return createResponse(400, {
+        success: false,
+        error: 'CSV file is required',
+      });
+    }
+
+    //** Parse CSV content to expense array
+    const expenses = await parseCSVToExpenses(csvContent);
+
+    if (expenses.length === 0) {
+      return createResponse(400, {
+        success: false,
+        error: 'No valid expenses found in CSV file',
+      });
+    }
+
+    if (expenses.length > 25) {
+      return createResponse(400, {
+        success: false,
+        error: 'Maximum 25 expenses per CSV upload',
+      });
+    }
+
+    //** 🎯 KEY: Reuse your existing bulkCreateExpenses logic!
+    const result = await expenseRepository.bulkCreateExpenses(userId, expenses);
+
+    const successCount = result.successful.length;
+    const failureCount = result.failed.length;
+    const totalAmount = result.successful.reduce((sum, exp) => sum + exp.amount, 0);
+
+    return createResponse(201, {
+      success: true,
+      data: {
+        successful: result.successful,
+        failed: result.failed,
+        csvProcessing: {
+          totalRows: expenses.length,
+          validExpenses: expenses.length,
+          duplicatesSkipped: 0, //** TODO: Add duplicate detection
+        },
+        summary: {
+          totalProcessed: expenses.length,
+          successful: successCount,
+          failed: failureCount,
+          totalAmount,
+          totalAmountMYR: `RM ${(totalAmount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
+        },
+      },
+      message: `CSV upload completed: ${successCount} successful, ${failureCount} failed from ${expenses.length} rows`,
+    });
+  } catch (error) {
+    console.error('Error processing CSV upload:', error);
+    return createResponse(500, {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to process CSV upload',
+    });
+  }
+};
 
 /**
- * Helper function to populate demo data for Malaysian users
- * You can call this during development to test your app
+ * Parse CSV file from API Gateway event
+ * Handles multipart/form-data or base64 encoded content
  */
-export const createMalaysianDemoData = async (userId: string) => {
-  const demoExpenses: CreateExpenseRequest[] = [
-    {
-      description: 'Nasi Kandar Pelita',
-      amount: 1250, //** RM 12.50
-      category: 'food_mamak' as any,
-      date: '2024-08-07',
-      merchant: 'Pelita Nasi Kandar',
-      paymentMethod: 'cash' as any,
-    },
-    {
-      description: 'Grab ride to KLCC',
-      amount: 1800, //** RM 18.00
-      category: 'transport_grab' as any,
-      date: '2024-08-07',
-      merchant: 'Grab',
-      paymentMethod: 'grabpay' as any,
-    },
-    {
-      description: 'Starbucks Venti Latte',
-      amount: 1650, //** RM 16.50
-      category: 'food_coffee' as any,
-      date: '2024-08-06',
-      merchant: 'Starbucks',
-      paymentMethod: 'credit_card' as any,
-    },
-    {
-      description: 'Petronas RON95',
-      amount: 4500, //** RM 45.00
-      category: 'transport_fuel' as any,
-      date: '2024-08-06',
-      merchant: 'Petronas',
-      paymentMethod: 'debit_card' as any,
-    },
-    {
-      description: 'AEON grocery shopping',
-      amount: 8750, //** RM 87.50
-      category: 'food_groceries' as any,
-      date: '2024-08-05',
-      merchant: 'AEON Big',
-      paymentMethod: 'credit_card' as any,
-    },
-  ];
+async function parseCSVFromEvent(event: APIGatewayProxyEvent): Promise<string | null> {
+  if (!event.body) {
+    return null;
+  }
 
-  return await expenseRepository.bulkCreateExpenses(userId, demoExpenses);
+  //** Handle base64 encoded body (API Gateway often base64 encodes binary data)
+  let csvContent: string;
+
+  if (event.isBase64Encoded) {
+    csvContent = Buffer.from(event.body, 'base64').toString('utf-8');
+  } else {
+    csvContent = event.body;
+  }
+
+  //** For MVP, we'll accept raw CSV content
+  //** In production, you'd want proper multipart/form-data parsing
+  return csvContent;
+}
+
+/**
+ * GET /api/expenses/search?q=searchTerm
+ * Search expenses by description
+ */
+export const searchExpenses = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
+  try {
+    const userId = getUserId(event);
+    const searchTerm = event.queryStringParameters?.q;
+
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      return createResponse(400, {
+        success: false,
+        error: 'Search term must be at least 2 characters',
+      });
+    }
+
+    //** Search expenses using repository
+    const expenses = await expenseRepository.searchExpensesByDescription(userId, searchTerm.trim());
+
+    return createResponse(200, {
+      success: true,
+      data: {
+        expenses,
+        searchTerm,
+        count: expenses.length,
+      },
+      message: `Found ${expenses.length} expenses matching "${searchTerm}"`,
+    });
+  } catch (error) {
+    console.error('Error searching expenses:', error);
+    return createResponse(500, {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to search expenses',
+    });
+  }
 };
