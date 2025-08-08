@@ -105,6 +105,18 @@ functions:
           method: post
           cors: true
 
+  # CSV Upload endpoint
+  uploadCSV:
+    handler: src/handler/expenses.uploadCSV
+    events:
+      - http:
+          path: api/expenses/csv
+          method: post
+          cors: true
+    environment:
+      DYNAMODB_TABLE: ${self:provider.environment.DYNAMODB_TABLE}
+      REGION: ${self:provider.region}
+
   # Analytics endpoint for dashboard
   getAnalytics:
     handler: src/handler/analytics.getAnalytics

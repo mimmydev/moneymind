@@ -5,33 +5,31 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}{{apiPath}}/expenses/:id?date=YYYY-MM-00
+  url: {{baseUrl}}{{apiPath}}/expenses/:id?date=2025-08-07
   body: json
   auth: none
 }
 
 params:query {
-  date: YYYY-MM-00
+  date: 2025-08-07
 }
 
 params:path {
-  id: 
+  id: exp_1754557705301_2el9ugjzy
 }
 
 docs {
-  ## **GET /api/expenses/{id}** - Get Single Expense
-  **Retrieve a specific expense by ID and date**
+  ## **GET /api/expenses/{id}**
   
   ### Bruno Configuration:
   - **Method:** GET
-  - **URL:** `{{baseUrl}}/api/expenses/:id`
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses/:id`
+  - **Path Parameters:**
+    - `id` (string): Expense ID (e.g., "exp_1754627675864_xb6zbswfs")
   - **Query Parameters (Required):**
-    - `date`: `2024-08-07` (YYYY-MM-DD format)
-  
-  ### Example URL:
-  ```
-  {{baseUrl}}/{{apiPath}}/expenses/exp_1754551220825_yc1isu2ro?date=2024-08-07
-  ```
+    - `date` (string): Expense date in YYYY-MM-DD format
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
   
   ### Expected Response:
   ```json
@@ -39,36 +37,65 @@ docs {
     "success": true,
     "data": {
       "expense": {
-        "id": "exp_1754551220825_yc1isu2ro",
-        "description": "Nasi Kandar Pelita",
+        "description_lowercase": "grab ride to klcc",
+        "id": "exp_1754627675867_z2opea1qh",
+        "userId": "demo-user-malaysia",
+        "description": "Grab ride to KLCC",
         "amount": 1250,
         "amountMYR": "RM 12.50",
-        "category": "food_mamak",
-        "date": "2024-08-07",
-        "merchant": "Pelita Nasi Kandar",
-        "location": "Kuala Lumpur",
+        "category": "transport_grab",
+        "date": "2024-08-08",
+        "merchant": "Grab",
+        "paymentMethod": "grabpay",
         "confidence": 95,
-        "createdAt": "2024-08-07T07:20:20.825Z",
-        "updatedAt": "2024-08-07T07:20:20.825Z"
+        "createdAt": "2025-08-08T04:34:35.867Z",
+        "updatedAt": "2025-08-08T04:34:35.867Z"
       }
     },
     "message": "Expense retrieved successfully"
   }
   ```
   
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Date query parameter is required (YYYY-MM-DD format)"
+  }
+  ```
+  
+  ### Error Response (404 - Not Found):
+  ```json
+  {
+    "success": false,
+    "error": "Expense not found"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to get expense"
+  }
+  ```
+  
   ### Bruno Documentation:
   ```markdown
-  **Required Parameters:**
-  - Path parameter: expense ID
-  - Query parameter: date (YYYY-MM-DD)
+  **Path Parameters:**
+  - `id`: The expense ID from expense creation or listing
   
-  **How to get these values:**
-  1. First call GET /api/expenses to get all expenses
-  2. Copy the "id" field (e.g., exp_1754551220825_yc1isu2ro)
-  3. Copy the "date" field (e.g., 2024-08-07)
-  4. Use both in this endpoint
+  **Required Query Parameters:**
+  - `date`: Expense date (YYYY-MM-DD) - needed for DynamoDB sort key
   
-  **Why both ID and date?**
-  DynamoDB requires both partition key (USER#userId) and sort key (EXPENSE#date#id) for single item retrieval.
+  **Response Fields Explained:**
+  - Single expense object with full details
+  - Same structure as expenses array from GET /expenses
+  
+  **Notes:**
+  - Requires both ID and date due to DynamoDB composite key design
+  - Date must match exactly or expense won't be found
+  - Used for expense detail views and edit forms
   ```
+  
 }

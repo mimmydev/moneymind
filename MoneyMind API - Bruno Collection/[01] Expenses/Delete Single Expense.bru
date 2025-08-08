@@ -19,14 +19,17 @@ params:path {
 }
 
 docs {
-  ## **DELETE /api/expenses/{id}** - Delete Expense
-  **Delete an expense**
+  ## **DELETE /api/expenses/{id}**
   
   ### Bruno Configuration:
   - **Method:** DELETE
-  - **URL:** `{{baseUrl}}/{{apiPath}}/expenses/:id`
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses/:id`
+  - **Path Parameters:**
+    - `id` (string): Expense ID
   - **Query Parameters (Required):**
-    - `date`: `2024-08-07`
+    - `date` (string): Expense date in YYYY-MM-DD format
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
   
   ### Expected Response:
   ```json
@@ -36,14 +39,38 @@ docs {
   }
   ```
   
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Date query parameter is required (YYYY-MM-DD format)"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to delete expense"
+  }
+  ```
+  
   ### Bruno Documentation:
   ```markdown
-  **Required URL Parameters:**
-  - Path: expense ID  
-  - Query: date (YYYY-MM-DD)
+  **Path Parameters:**
+  - `id`: Expense ID to delete
   
-  **Warning:**
-  - This action cannot be undone
-  - Expense is permanently removed from database
+  **Required Query Parameters:**
+  - `date`: Expense date (YYYY-MM-DD) - needed for DynamoDB deletion
+  
+  **Response Fields Explained:**
+  - Simple success confirmation
+  - No expense data returned after deletion
+  
+  **Notes:**
+  - Deletion is permanent - no soft delete implemented
+  - Requires exact date match due to composite key structure
+  - Returns success even if expense doesn't exist (idempotent)
   ```
+  
 }

@@ -11,26 +11,17 @@ get {
 }
 
 docs {
-  # Environment Setup
-  First, set up your environment in Bruno:
+  ## **Environment**
   
-  ```
-  Base URL: https://your-api-id.execute-api.ap-southeast-1.amazonaws.com/dev
-  ```
-  
-  ## **GET /** - Health Check
-  **Test if your API is running**
-  
-  ### Bruno Configuration:
-  - **Method:** GET
-  - **URL:** `{{baseUrl}}/`
-  - **Headers:** None needed
-  
-  ### Expected Response:
-  ```json
+  ```javascript
+  // Set these in your Bruno environment
   {
-    "message": "MoneyMind API is running!"
+    "baseUrl": "https://your-api-gateway-id.execute-api.ap-southeast-5.amazonaws.com/dev",
+    "apiPath": "/api"
   }
   ```
   
+  ## **Authentication Notes**
+  - Currently using demo user system
+  - All endpoints support optional `userId` query parameter
 }

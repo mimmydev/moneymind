@@ -5,26 +5,24 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}{{apiPath}}/analytics?period=90d
+  url: {{baseUrl}}{{apiPath}}/analytics?period=7d
   body: none
   auth: none
 }
 
 params:query {
-  period: 90d
+  period: 7d
 }
 
 docs {
   ## **GET /api/analytics**
-  **Get spending analytics with Malaysian insights and category breakdowns**
   
   ### Bruno Configuration:
   - **Method:** GET
   - **URL:** `{{baseUrl}}{{apiPath}}/analytics`
   - **Query Parameters (Optional):**
-    - `period`: Time period for analytics (default: "30d")
-    - Valid values: "7d", "30d", "90d", "1y"
-    - `userId`: User identifier (default: "demo-user-malaysia")
+    - `period` (string): Time period for analytics ("7d", "30d", "90d", "1y")
+    - `userId` (string): User ID (default: "demo-user-malaysia")
   
   ### Expected Response:
   ```json
@@ -32,78 +30,37 @@ docs {
     "success": true,
     "data": {
       "analytics": {
-        "totalSpent": 5750,
-        "totalSpentMYR": "RM 57.50",
-        "transactionCount": 2,
-        "budgetRemaining": 44250,
-        "budgetRemainingMYR": "RM 442.50",
-        "budgetUsagePercentage": 12,
-        "dailyAverage": 192,
-        "dailyAverageMYR": "RM 1.92",
-        "categoryBreakdown": [
+        "totalSpent": 5550,
+        "totalSpentMYR": "RM 55.50",
+        "transactionCount": 3,
+        "avgTransactionAmount": 1850,
+        "avgTransactionAmountMYR": "RM 18.50",
+        "budgetUsed": 12,
+        "budgetUsedMYR": "RM 55.50 of RM 500.00",
+        "spendingByCategory": [
           {
-            "name": "other_miscellaneous",
-            "total": 4500,
-            "count": 1,
-            "percentage": 78,
-            "avgPerTransaction": 4500,
-            "totalMYR": "RM 45.00",
-            "avgPerTransactionMYR": "RM 45.00"
+            "category": "transport_grab",
+            "amount": 1250,
+            "amountMYR": "RM 12.50",
+            "percentage": 23,
+            "transactionCount": 1
           },
           {
-            "name": "food_mamak",
-            "total": 1250,
-            "count": 1,
-            "percentage": 22,
-            "avgPerTransaction": 1250,
-            "totalMYR": "RM 12.50",
-            "avgPerTransactionMYR": "RM 12.50"
+            "category": "food_mamak",
+            "amount": 1250,
+            "amountMYR": "RM 12.50",
+            "percentage": 23,
+            "transactionCount": 1
           }
         ],
-        "spendingTrends": {
-          "dailySpending": [
-            {
-              "date": "2025-08-07",
-              "amount": 5750,
-              "amountMYR": "RM 57.50"
-            }
-          ],
-          "peakSpendingDay": {
-            "date": "2025-08-07",
-            "amount": 5750,
-            "amountMYR": "RM 57.50"
-          },
-          "lowestSpendingDay": {
-            "date": "2025-08-07",
-            "amount": 5750,
-            "amountMYR": "RM 57.50"
-          }
-        },
-        "smartInsights": [
-          "📊 Your top spending category is other miscellaneous at 78%",
-          "✅ Great budgeting! Only 12% of budget used",
-          "🔍 1 transactions need category review"
-        ],
-        "topMerchants": [
-          {
-            "merchant": "KFC",
-            "total": 4500,
-            "totalMYR": "RM 45.00"
-          },
-          {
-            "merchant": "Pelita Nasi Kandar",
-            "total": 1250,
-            "totalMYR": "RM 12.50"
-          }
+        "insights": [
+          "You spent RM 12.50 on mamak food - that's about 3 meals!",
+          "Your biggest spending category this period is transport_grab",
+          "You're doing great! Only used 12% of your budget."
         ]
-      },
-      "period": "30d",
-      "dateRange": {
-        "startDate": "2025-07-08",
-        "endDate": "2025-08-07"
       }
     },
-    "message": "Analytics calculated for 2 expenses"
+    "message": "Analytics calculated for 30d period"
   }
   ```
   
@@ -111,7 +68,7 @@ docs {
   ```json
   {
     "success": false,
-    "error": "Invalid period. Use one of: 7d, 30d, 90d, 1y"
+    "error": "Invalid period format. Use: 7d, 30d, 90d, or 1y"
   }
   ```
   
@@ -119,37 +76,30 @@ docs {
   ```json
   {
     "success": false,
-    "error": "Failed to get analytics"
+    "error": "Failed to calculate analytics"
   }
   ```
   
   ### Bruno Documentation:
   ```markdown
   **Optional Query Parameters:**
-  - `period`: Analytics time period
-    - "7d" = Last 7 days
-    - "30d" = Last 30 days (default)
-    - "90d" = Last 90 days
-    - "1y" = Last year
-  - `userId`: For testing different users (MVP uses demo-user-malaysia)
+  - `period`: Analytics timeframe (defaults to "30d")
+    - "7d": Last 7 days
+    - "30d": Last 30 days  
+    - "90d": Last 90 days
+    - "1y": Last 1 year
   
   **Response Fields Explained:**
-  - `totalSpent`: Total amount in cents (5750 = RM 57.50)
-  - `budgetUsagePercentage`: Percentage of RM 500 budget used
-  - `categoryBreakdown`: Expenses grouped by category with percentages
-  - `spendingTrends`: Daily spending data for charts
-  - `smartInsights`: Malaysian-specific spending insights
-  - `topMerchants`: Most frequently used merchants
+  - `totalSpent`: Total amount spent in cents
+  - `budgetUsed`: Percentage of monthly budget used (assumes RM 500 budget)
+  - `spendingByCategory`: Breakdown by Malaysian expense categories
+  - `insights`: AI-generated spending insights with Malaysian context
   
-  **Malaysian Features:**
-  - All amounts shown in both cents and "RM X.XX" format
-  - Malaysian-specific insights (mamak, transport, e-wallets)
-  - Budget tracking against RM 500 default budget
-  - Smart categorization confidence scoring
-  
-  **Performance Notes:**
-  - Filters expenses by date range in application memory
-  - Efficient for personal finance app scale (< 1000 expenses) - its MVP based anyway
-  - Real-time calculation, no cached data
+  **Notes:**
+  - Real-time calculations from DynamoDB
+  - Malaysian-specific insights (mamak meal counts, etc.)
+  - Budget percentage assumes RM 500 monthly budget
+  - Categories ranked by spending amount
+  - Perfect for dashboard widgets and spending reports
   ```
 }

@@ -1,0 +1,111 @@
+meta {
+  name: Upload Bulk in CSV
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}{{apiPath}}/expenses/csv
+  body: none
+  auth: none
+}
+
+docs {
+  ## **POST /api/expenses/csv**
+  
+  ### Bruno Configuration:
+  - **Method:** POST
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses/csv`
+  - **Headers:**
+    - `Content-Type: text/csv`
+  - **Body Type:** Raw (Text/CSV)
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
+  
+  ### Request Body:
+  ```csv
+  date,description,amount,merchant,category
+  08/08/2024,Nasi Kandar Pelita,RM 12.50,Pelita Nasi Kandar,
+  07/08/2024,Grab ride to KLCC,18.00,Grab,
+  06/08/2024,Old Town White Coffee,RM 8.90,Old Town,
+  05/08/2024,99 Speedmart groceries,RM 67.80,99 Speedmart,
+  04/08/2024,Mamak nasi lemak,RM 4.50,Restoran Mamak,
+  ```
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "successful": [
+        {
+          "description_lowercase": "nasi kandar pelita",
+          "id": "exp_1754627675864_xb6zbswfs",
+          "userId": "demo-user-malaysia",
+          "description": "Nasi Kandar Pelita",
+          "amount": 1250,
+          "amountMYR": "RM 12.50",
+          "category": "food_mamak",
+          "date": "2024-08-08",
+          "merchant": "Pelita Nasi Kandar",
+          "paymentMethod": "card",
+          "confidence": 95,
+          "createdAt": "2025-08-08T04:34:35.865Z",
+          "updatedAt": "2025-08-08T04:34:35.865Z"
+        }
+      ],
+      "failed": [],
+      "csvProcessing": {
+        "totalRows": 5,
+        "validExpenses": 5,
+        "duplicatesSkipped": 0
+      },
+      "summary": {
+        "totalProcessed": 5,
+        "successful": 5,
+        "failed": 0,
+        "totalAmount": 11120,
+        "totalAmountMYR": "RM 111.20"
+      }
+    },
+    "message": "CSV upload completed: 5 successful, 0 failed from 5 rows"
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "No valid expenses found in CSV file"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to process CSV upload"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **CSV Format Requirements:**
+  - First row must be headers: `date,description,amount,merchant,category`
+  - Date formats supported: DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD
+  - Amount formats: "RM 12.50", "12.50", with or without RM prefix
+  - Category is optional (will auto-categorize if empty)
+  
+  **Response Fields Explained:**
+  - `csvProcessing`: Details about CSV parsing process
+  - `totalRows`: Number of data rows in CSV (excluding header)
+  - Same successful/failed structure as bulk endpoint
+  
+  **Notes:**
+  - Maximum 500 expenses per CSV file
+  - Handles Malaysian currency formats automatically
+  - Gracefully handles malformed rows (skips them)
+  - Uses same auto-categorization as other endpoints
+  - Perfect for bank statement imports and data migration
+  ```
+}

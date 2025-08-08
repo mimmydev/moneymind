@@ -5,31 +5,25 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}{{apiPath}}/expenses/search?q=nasi ayam
+  url: {{baseUrl}}{{apiPath}}/expenses/search?q=lrt
   body: none
   auth: none
 }
 
 params:query {
-  q: nasi ayam
+  q: lrt
 }
 
 docs {
-  ## **GET /api/expenses/search** - Search Expenses  
-  **Search expenses by description (case-sensitive)**
+  ## **GET /api/expenses/search**
   
   ### Bruno Configuration:
   - **Method:** GET
-  - **URL:** `{{baseUrl}}/api/expenses/search`
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses/search`
   - **Query Parameters (Required):**
-    - `q`: `Nasi` (search term, minimum 2 characters, case-sensitive)
-  
-  ### Example URLs:
-  ```
-  {{baseUrl}}/api/expenses/search?q=Nasi
-  {{baseUrl}}/api/expenses/search?q=Grab
-  {{baseUrl}}/api/expenses/search?q=Starbucks
-  ```
+    - `q` (string): Search term (minimum 2 characters)
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
   
   ### Expected Response:
   ```json
@@ -38,31 +32,59 @@ docs {
     "data": {
       "expenses": [
         {
-          "id": "exp_1754551220825_yc1isu2ro",
-          "description": "Nasi Kandar Pelita",
+          "description_lowercase": "grab ride to klcc",
+          "id": "exp_1754627675867_z2opea1qh",
+          "userId": "demo-user-malaysia",
+          "description": "Grab ride to KLCC",
           "amount": 1250,
           "amountMYR": "RM 12.50",
-          "category": "food_mamak",
-          "date": "2024-08-07"
+          "category": "transport_grab",
+          "date": "2024-08-08",
+          "merchant": "Grab",
+          "paymentMethod": "grabpay",
+          "confidence": 95,
+          "createdAt": "2025-08-08T04:34:35.867Z",
+          "updatedAt": "2025-08-08T04:34:35.867Z"
         }
       ],
-      "searchTerm": "Nasi",
+      "searchTerm": "grab",
       "count": 1
     },
-    "message": "Found 1 expenses matching \"Nasi\""
+    "message": "Found 1 expenses matching \"grab\""
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Search term must be at least 2 characters"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to search expenses"
   }
   ```
   
   ### Bruno Documentation:
   ```markdown
-  **Important Notes:**
-  - Minimum 2 characters required
-  - Searches in description field only
-  - Uses `Query` to efficiently find user expenses, then filters at database level
+  **Required Query Parameters:**
+  - `q`: Search term - searches expense descriptions (case-insensitive)
   
+  **Response Fields Explained:**
+  - `expenses`: Array of matching expenses (same structure as GET /expenses)
+  - `searchTerm`: Echo of the search query used
+  - `count`: Number of results found
   
-  **Tips:**
-  - Try "Nasi", "Grab", "Starbucks", "Touch"
-  - Use exact case from your expense descriptions
+  **Notes:**
+  - Searches description field using case-insensitive contains matching
+  - Minimum 2 characters required for search term
+  - Results sorted by date descending (newest first)
+  - Limited to 20 results for performance
   ```
+  
 }
