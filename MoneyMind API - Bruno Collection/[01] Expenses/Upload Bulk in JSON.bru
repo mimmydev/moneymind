@@ -1,0 +1,131 @@
+meta {
+  name: Upload Bulk in JSON
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}{{apiPath}}/expenses/bulk
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Content-Type: text/csv
+}
+
+body:multipart-form {
+  : @file(/Users/user/Desktop/learning/moneymind/backend/malaysian_expenses_test.csv)
+}
+
+docs {
+  ## **POST /api/expenses/bulk**
+  
+  ### Bruno Configuration:
+  - **Method:** POST
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses/bulk`
+  - **Headers:**
+    - `Content-Type: application/json`
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
+  
+  ### Request Body:
+  ```json
+  {
+    "expenses": [
+      {
+        "description": "Nasi Kandar Pelita",
+        "amount": 1250,
+        "date": "2024-08-08",
+        "merchant": "Pelita Nasi Kandar",
+        "paymentMethod": "cash"
+      },
+      {
+        "description": "Grab ride to KLCC",
+        "amount": 1800,
+        "date": "2024-08-07",
+        "merchant": "Grab",
+        "paymentMethod": "grabpay"
+      },
+      {
+        "description": "Old Town White Coffee",
+        "amount": 890,
+        "date": "2024-08-06",
+        "merchant": "Old Town",
+        "paymentMethod": "card"
+      }
+    ]
+  }
+  ```
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "successful": [
+        {
+          "description_lowercase": "nasi kandar pelita",
+          "id": "exp_1754627675864_xb6zbswfs",
+          "userId": "demo-user-malaysia",
+          "description": "Nasi Kandar Pelita",
+          "amount": 1250,
+          "amountMYR": "RM 12.50",
+          "category": "food_mamak",
+          "date": "2024-08-08",
+          "merchant": "Pelita Nasi Kandar",
+          "paymentMethod": "cash",
+          "confidence": 95,
+          "createdAt": "2025-08-08T04:34:35.865Z",
+          "updatedAt": "2025-08-08T04:34:35.865Z"
+        }
+      ],
+      "failed": [],
+      "summary": {
+        "totalProcessed": 3,
+        "successful": 3,
+        "failed": 0,
+        "totalAmount": 3940,
+        "totalAmountMYR": "RM 39.40"
+      }
+    },
+    "message": "Bulk upload completed: 3 successful, 0 failed"
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Maximum 100 expenses per batch. For larger uploads, use multiple requests."
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to bulk create expenses"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Request Body Structure:**
+  - `expenses`: Array of expense objects (same format as POST /expenses)
+  - Maximum 100 expenses per batch
+  
+  **Response Fields Explained:**
+  - `successful`: Array of successfully created expenses
+  - `failed`: Array of failed expenses with error details
+  - `summary.totalAmount`: Sum of all successful expense amounts (in cents)
+  - `summary.totalAmountMYR`: Human-readable total in Malaysian Ringgit
+  
+  **Notes:**
+  - Processes in batches of 25 (DynamoDB BatchWrite limit)
+  - Continues processing valid expenses even if some fail
+  - Auto-categorization applied to each expense
+  - Perfect for programmatic bulk imports from applications
+  ```
+  
+}

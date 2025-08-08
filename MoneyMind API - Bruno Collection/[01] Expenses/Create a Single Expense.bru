@@ -11,41 +11,27 @@ post {
 }
 
 docs {
-  ## **POST /api/expenses** - Create Expense
-  **Create a new expense**
+  ## **POST /api/expenses**
   
   ### Bruno Configuration:
   - **Method:** POST
-  - **URL:** `{{baseUrl}}/api/expenses`
-  - **Headers:** 
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses`
+  - **Headers:**
     - `Content-Type: application/json`
-  - **Body (JSON):**
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
+  
+  ### Request Body:
   ```json
   {
-    "description": "Mamak Teh Tarik",
-    "amount": 350,
+    "description": "Mamak nasi lemak breakfast",
+    "amount": 450,
+    "date": "2024-08-08",
     "merchant": "Restoran Mamak",
-    "location": "Petaling Jaya"
-  }
-  ```
-  
-  ### More Examples:
-  ```json
-  {
-    "description": "Grab ride to Mid Valley",
-    "amount": 1200,
-    "merchant": "Grab",
-    "paymentMethod": "grabpay"
-  }
-  ```
-  
-  ```json
-  {
-    "description": "Petronas fuel",
-    "amount": 6000,
-    "merchant": "Petronas Station",
-    "category": "transport_fuel",
-    "date": "2024-08-07"
+    "location": "SS2, Petaling Jaya",
+    "notes": "Extra sambal",
+    "paymentMethod": "cash",
+    "category": "food_mamak"
   }
   ```
   
@@ -55,44 +41,65 @@ docs {
     "success": true,
     "data": {
       "expense": {
-        "id": "exp_1754551234567_abc123",
-        "description": "Mamak Teh Tarik", 
-        "amount": 350,
-        "amountMYR": "RM 3.50",
+        "description_lowercase": "mamak nasi lemak breakfast",
+        "id": "exp_1754627675864_abc123def",
+        "userId": "demo-user-malaysia",
+        "description": "Mamak nasi lemak breakfast",
+        "amount": 450,
+        "amountMYR": "RM 4.50",
         "category": "food_mamak",
-        "confidence": 95,
-        "date": "2024-08-07",
+        "date": "2024-08-08",
         "merchant": "Restoran Mamak",
-        "location": "Petaling Jaya"
+        "location": "SS2, Petaling Jaya",
+        "notes": "Extra sambal",
+        "paymentMethod": "cash",
+        "confidence": 100,
+        "createdAt": "2025-08-08T04:34:35.865Z",
+        "updatedAt": "2025-08-08T04:34:35.865Z"
       }
     },
-    "message": "Expense created successfully: RM 3.50 for Mamak Teh Tarik"
+    "message": "Expense created successfully: RM 4.50 for Mamak nasi lemak breakfast"
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Amount must be in cents (integer value). For RM 10.50, send 1050"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to create expense"
   }
   ```
   
   ### Bruno Documentation:
   ```markdown
   **Required Fields:**
-  - description: string (not empty)
-  - amount: integer in cents (1050 = RM 10.50)
+  - `description`: What the expense was for
+  - `amount`: Amount in cents (450 = RM 4.50)
   
   **Optional Fields:**
-  - merchant: string
-  - location: string  
-  - category: Malaysian category (will auto-detect if not provided)
-  - date: YYYY-MM-DD (defaults to today)
-  - paymentMethod: Malaysian payment methods
-  - notes: string
+  - `date`: Expense date (defaults to today if not provided)
+  - `category`: Malaysian category (will auto-categorize if not provided)
+  - `merchant`: Where the expense occurred
+  - `location`: Physical location
+  - `notes`: Additional details
+  - `paymentMethod`: cash, card, grabpay, tng, etc.
   
-  **Amount Format:**
-  - Send as integer in cents
-  - RM 10.50 = 1050
-  - RM 3.50 = 350
+  **Response Fields Explained:**
+  - `confidence`: 100 if category manually set, lower if auto-categorized
+  - Auto-generated unique ID and timestamps
   
-  **Auto-categorization:**
-  - "Nasi Kandar" → food_mamak
-  - "Grab" → transport_grab  
-  - "Starbucks" → food_coffee
-  - "Petronas" → transport_fuel
+  **Notes:**
+  - Amount must be integer (cents) - no decimal places
+  - Auto-categorization uses Malaysian merchant patterns
+  - If no category provided, will analyze description for best match
   ```
+  
 }

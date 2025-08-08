@@ -11,26 +11,18 @@ get {
 }
 
 docs {
-  ## **GET /api/expenses** - Get All Expenses
-  **Retrieve user's expenses with optional filtering**
+  ## **GET /api/expenses**
   
   ### Bruno Configuration:
-  - **Method:** GET  
-  - **URL:** `{{baseUrl}}/api/expenses`
+  - **Method:** GET
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses`
   - **Query Parameters (Optional):**
-    - `startDate`: `2024-08-01` (YYYY-MM-DD format)
-    - `endDate`: `2024-08-31` (YYYY-MM-DD format)  
-    - `category`: `food_mamak` (Malaysian category)
-    - `limit`: `10` (default: 20, max: 100)
-    - `userId`: `demo-user-malaysia` (optional, defaults to demo user)
-  
-  ### Example URLs:
-  ```
-  {{baseUrl}}/api/expenses
-  {{baseUrl}}/api/expenses?limit=5
-  {{baseUrl}}/api/expenses?startDate=2024-08-05&endDate=2024-08-07
-  {{baseUrl}}/api/expenses?category=food_mamak
-  ```
+    - `startDate` (string): Filter expenses from this date (YYYY-MM-DD)
+    - `endDate` (string): Filter expenses to this date (YYYY-MM-DD)
+    - `category` (string): Filter by specific category (e.g., "food_mamak", "transport_grab")
+    - `limit` (number): Number of expenses to return (default: 20, max: 100)
+    - `lastEvaluatedKey` (string): Pagination token for next page
+    - `userId` (string): User ID (default: "demo-user-malaysia")
   
   ### Expected Response:
   ```json
@@ -39,24 +31,67 @@ docs {
     "data": {
       "expenses": [
         {
-          "id": "exp_1754551220825_yc1isu2ro",
+          "description_lowercase": "nasi kandar pelita",
+          "id": "exp_1754627675864_xb6zbswfs",
+          "userId": "demo-user-malaysia",
           "description": "Nasi Kandar Pelita",
           "amount": 1250,
           "amountMYR": "RM 12.50",
           "category": "food_mamak",
-          "date": "2024-08-07",
+          "date": "2024-08-08",
           "merchant": "Pelita Nasi Kandar",
-          "confidence": 95
+          "paymentMethod": "cash",
+          "confidence": 95,
+          "createdAt": "2025-08-08T04:34:35.865Z",
+          "updatedAt": "2025-08-08T04:34:35.865Z"
         }
       ],
       "pagination": {
         "hasMore": false,
         "lastEvaluatedKey": null,
         "limit": 20,
-        "count": 2
+        "count": 1
       }
     },
-    "message": "Found 2 expenses"
+    "message": "Found 1 expenses"
   }
   ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Invalid startDate format. Use YYYY-MM-DD"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to get expenses"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Optional Query Parameters:**
+  - `startDate`: Filter expenses from this date onwards (YYYY-MM-DD format)
+  - `endDate`: Filter expenses up to this date (YYYY-MM-DD format)  
+  - `category`: Filter by Malaysian category (food_mamak, transport_grab, etc.)
+  - `limit`: Control number of results (1-100, default 20)
+  - `lastEvaluatedKey`: For pagination - use value from previous response
+  
+  **Response Fields Explained:**
+  - `amount`: Amount in cents (1250 = RM 12.50)
+  - `amountMYR`: Human-readable Malaysian Ringgit format
+  - `confidence`: Auto-categorization confidence (0-100)
+  - `category`: Malaysian-specific categories for local context
+  
+  **Notes:**
+  - Expenses are sorted by date descending (newest first)
+  - Pagination uses DynamoDB's lastEvaluatedKey system
+  - Demo user ID used when userId parameter not provided
+  ```
+  
 }
