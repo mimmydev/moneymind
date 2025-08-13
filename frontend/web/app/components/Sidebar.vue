@@ -62,7 +62,7 @@ const links = [
             :to="link.to"
             @click="isMobileMenuOpen = false"
             class="flex items-center px-4 py-2 text-foreground hover:text-primary hover:bg-accent/60 rounded-xl transition-all duration-300"
-            active-class="text-white font-semibold bg-green-300 [&>i]:text-white [&>span]:text-white"
+            active-class="text-white font-semibold bg-green-300 [&>i]:text-white [&>span]:text-white hover:text-white"
           >
             <div
               class="flex items-center justify-center w-8 h-8 rounded-lg bg-accent/20 group-hover:bg-accent/40 mr-3"
@@ -88,7 +88,7 @@ const links = [
           :key="link.to"
           :to="link.to"
           class="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-accent rounded-lg transition-colors"
-          active-class="text-white font-semibold bg-[#12CE90] [&>i]:text-white"
+          active-class="text-white font-semibold bg-[#12CE90] [&>i]:text-white hover:text-white"
         >
           <div class="flex items-center justify-center w-6 h-6 mr-2">
             <i :class="`${link.icon}`"></i>
