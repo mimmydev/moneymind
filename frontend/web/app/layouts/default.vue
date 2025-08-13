@@ -1,9 +1,11 @@
 <script setup></script>
 
 <template>
-  <div class="grid grid-rows-[auto_1fr] h-full">
-    <Header />
-    <main class="overflow-y-auto">
+  <div class="flex flex-col lg:flex-row h-full">
+    <Sidebar />
+    <main
+      class="flex-1 overflow-y-auto mx-2 lg:ml-0 lg:mr-8 p-4 lg:p-6 lg:shadow-xl lg:shadow-black/20 lg:shadow-left"
+    >
       <slot />
     </main>
   </div>
