@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import ModeToggle from './ModeToggle.vue';
-import 'primeicons/primeicons.css';
+import { Icon } from '@iconify/vue';
 
 const isMobileMenuOpen = ref(false);
 
@@ -10,9 +10,9 @@ const toggleMobileMenu = () => {
 };
 
 const links = [
-  { to: '/', label: 'Dashboard', icon: 'pi pi-objects-column' },
-  { to: '/transactions', label: 'Expenses', icon: 'pi pi-credit-card' },
-  { to: '/analytics', label: 'Analytics', icon: 'pi pi-chart-line' },
+  { to: '/', label: 'Dashboard', icon: 'prime:objects-column' },
+  { to: '/transactions', label: 'Expenses', icon: 'prime:credit-card' },
+  { to: '/analytics', label: 'Analytics', icon: 'prime:chart-line' },
 ];
 </script>
 
@@ -24,7 +24,9 @@ const links = [
       <img src="/images/Rectangle 1.png" alt="MoneyMind Logo" class="w-36 rounded-sm" />
       <div class="flex gap-4">
         <ModeToggle />
-        <button @click="toggleMobileMenu" class="pi pi-bars mr-8"></button>
+        <button @click="toggleMobileMenu" class="mr-8">
+          <Icon icon="prime:bars" :ssr="true" />
+        </button>
       </div>
     </div>
 
@@ -53,7 +55,7 @@ const links = [
     >
       <nav
         v-if="isMobileMenuOpen"
-        class="absolute top-[72px] left-4 right-4 bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg z-50 lg:hidden"
+        class="absolute top-[72px] left-4 right-4 bg-white backdrop-blur-sm border border-border rounded-lg shadow-lg z-50 lg:hidden"
       >
         <div class="p-3 space-y-1">
           <NuxtLink
@@ -62,12 +64,12 @@ const links = [
             :to="link.to"
             @click="isMobileMenuOpen = false"
             class="flex items-center px-4 py-2 text-foreground hover:text-primary hover:bg-accent/60 rounded-xl transition-all duration-300"
-            active-class="text-white font-semibold bg-green-300 [&>i]:text-white [&>span]:text-white hover:text-white"
+            active-class="text-white font-semibold bg-primary [&>i]:text-white [&>span]:text-white hover:text-white"
           >
             <div
               class="flex items-center justify-center w-8 h-8 rounded-lg bg-accent/20 group-hover:bg-accent/40 mr-3"
             >
-              <i :class="`${link.icon}`"></i>
+              <Icon :icon="link.icon" :ssr="true" />
             </div>
             <span class="font-medium">{{ link.label }}</span>
           </NuxtLink>
@@ -90,9 +92,7 @@ const links = [
           class="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-accent rounded-lg transition-colors"
           active-class="text-white font-semibold bg-[#12CE90] [&>i]:text-white hover:text-white"
         >
-          <div class="flex items-center justify-center w-6 h-6 mr-2">
-            <i :class="`${link.icon}`"></i>
-          </div>
+          <Icon :icon="link.icon" :ssr="true" class="w-6 h-6 mr-2" />
           {{ link.label }}
         </NuxtLink>
       </div>
