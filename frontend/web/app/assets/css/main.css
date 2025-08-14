@@ -53,6 +53,8 @@
   --color-neutral-800: oklch(27.81% 0.03 256.85);
   --color-neutral-900: oklch(21.01% 0.032 264.66);
 
+  --color-border: oklch(94.67% 0.013 261.69);
+
   /* === Semantic & Text === */
   --color-success: oklch(69.59% 0.149 162.48);
   /* --primary-500 */

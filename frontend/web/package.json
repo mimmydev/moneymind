@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@iconify/vue": "^5.0.0",
     "@nuxt/ui": "3.3.0",
     "chart.js": "^4.5.0",
     "class-variance-authority": "^0.7.1",
