@@ -1,0 +1,97 @@
+meta {
+  name: Get All Expenses
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}{{apiPath}}/expenses
+  body: none
+  auth: none
+}
+
+docs {
+  ## **GET /api/expenses**
+  
+  ### Bruno Configuration:
+  - **Method:** GET
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses`
+  - **Query Parameters (Optional):**
+    - `startDate` (string): Filter expenses from this date (YYYY-MM-DD)
+    - `endDate` (string): Filter expenses to this date (YYYY-MM-DD)
+    - `category` (string): Filter by specific category (e.g., "food_mamak", "transport_grab")
+    - `limit` (number): Number of expenses to return (default: 20, max: 100)
+    - `lastEvaluatedKey` (string): Pagination token for next page
+    - `userId` (string): User ID (default: "demo-user-malaysia")
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "expenses": [
+        {
+          "description_lowercase": "nasi kandar pelita",
+          "id": "exp_1754627675864_xb6zbswfs",
+          "userId": "demo-user-malaysia",
+          "description": "Nasi Kandar Pelita",
+          "amount": 1250,
+          "amountMYR": "RM 12.50",
+          "category": "food_mamak",
+          "date": "2024-08-08",
+          "merchant": "Pelita Nasi Kandar",
+          "paymentMethod": "cash",
+          "confidence": 95,
+          "createdAt": "2025-08-08T04:34:35.865Z",
+          "updatedAt": "2025-08-08T04:34:35.865Z"
+        }
+      ],
+      "pagination": {
+        "hasMore": false,
+        "lastEvaluatedKey": null,
+        "limit": 20,
+        "count": 1
+      }
+    },
+    "message": "Found 1 expenses"
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Invalid startDate format. Use YYYY-MM-DD"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to get expenses"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Optional Query Parameters:**
+  - `startDate`: Filter expenses from this date onwards (YYYY-MM-DD format)
+  - `endDate`: Filter expenses up to this date (YYYY-MM-DD format)  
+  - `category`: Filter by Malaysian category (food_mamak, transport_grab, etc.)
+  - `limit`: Control number of results (1-100, default 20)
+  - `lastEvaluatedKey`: For pagination - use value from previous response
+  
+  **Response Fields Explained:**
+  - `amount`: Amount in cents (1250 = RM 12.50)
+  - `amountMYR`: Human-readable Malaysian Ringgit format
+  - `confidence`: Auto-categorization confidence (0-100)
+  - `category`: Malaysian-specific categories for local context
+  
+  **Notes:**
+  - Expenses are sorted by date descending (newest first)
+  - Pagination uses DynamoDB's lastEvaluatedKey system
+  - Demo user ID used when userId parameter not provided
+  ```
+  
+}

@@ -1,0 +1,124 @@
+meta {
+  name: Update Expense
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}{{apiPath}}/expenses/:id?date=2025-08-07
+  body: json
+  auth: none
+}
+
+params:query {
+  date: 2025-08-07
+}
+
+params:path {
+  id: exp_1754562896601_78o23o8wp
+}
+
+body:json {
+  {
+    "location": "Tawau"
+  }
+}
+
+docs {
+  ## **PUT /api/expenses/{id}**
+  
+  ### Bruno Configuration:
+  - **Method:** PUT
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses/:id`
+  - **Headers:**
+    - `Content-Type: application/json`
+  - **Path Parameters:**
+    - `id` (string): Expense ID
+  - **Query Parameters (Required):**
+    - `date` (string): Expense date in YYYY-MM-DD format
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
+  
+  ### Request Body:
+  ```json
+  {
+    "description": "Updated description",
+    "amount": 1200,
+    "category": "food_coffee",
+    "merchant": "Starbucks KLCC",
+    "notes": "Venti latte with extra shot"
+  }
+  ```
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "expense": {
+        "description_lowercase": "updated description",
+        "id": "exp_1754627675864_xb6zbswfs",
+        "userId": "demo-user-malaysia",
+        "description": "Updated description",
+        "amount": 1200,
+        "amountMYR": "RM 12.00",
+        "category": "food_coffee",
+        "date": "2024-08-08",
+        "merchant": "Starbucks KLCC",
+        "notes": "Venti latte with extra shot",
+        "paymentMethod": "cash",
+        "confidence": 95,
+        "createdAt": "2025-08-08T04:34:35.865Z",
+        "updatedAt": "2025-08-08T05:12:22.123Z"
+      }
+    },
+    "message": "Expense updated successfully"
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Amount must be in cents (integer value)"
+  }
+  ```
+  
+  ### Error Response (404 - Not Found):
+  ```json
+  {
+    "success": false,
+    "error": "Expense not found"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to update expense"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Path Parameters:**
+  - `id`: Expense ID to update
+  
+  **Required Query Parameters:**
+  - `date`: Original expense date (YYYY-MM-DD)
+  
+  **Request Body Fields (All Optional):**
+  - Only include fields you want to update
+  - Same validation rules as POST /expenses
+  
+  **Response Fields Explained:**
+  - Returns the complete updated expense object
+  - `updatedAt` timestamp will be refreshed
+  
+  **Notes:**
+  - Partial updates supported - send only fields to change
+  - Amount validation same as create (must be in cents)
+  - Category changes will update search indexes automatically
+  ```
+}

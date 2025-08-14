@@ -1,0 +1,105 @@
+meta {
+  name: Get Smart Analytics
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}{{apiPath}}/analytics?period=7d
+  body: none
+  auth: none
+}
+
+params:query {
+  period: 7d
+}
+
+docs {
+  ## **GET /api/analytics**
+  
+  ### Bruno Configuration:
+  - **Method:** GET
+  - **URL:** `{{baseUrl}}{{apiPath}}/analytics`
+  - **Query Parameters (Optional):**
+    - `period` (string): Time period for analytics ("7d", "30d", "90d", "1y")
+    - `userId` (string): User ID (default: "demo-user-malaysia")
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "analytics": {
+        "totalSpent": 5550,
+        "totalSpentMYR": "RM 55.50",
+        "transactionCount": 3,
+        "avgTransactionAmount": 1850,
+        "avgTransactionAmountMYR": "RM 18.50",
+        "budgetUsed": 12,
+        "budgetUsedMYR": "RM 55.50 of RM 500.00",
+        "spendingByCategory": [
+          {
+            "category": "transport_grab",
+            "amount": 1250,
+            "amountMYR": "RM 12.50",
+            "percentage": 23,
+            "transactionCount": 1
+          },
+          {
+            "category": "food_mamak",
+            "amount": 1250,
+            "amountMYR": "RM 12.50",
+            "percentage": 23,
+            "transactionCount": 1
+          }
+        ],
+        "insights": [
+          "You spent RM 12.50 on mamak food - that's about 3 meals!",
+          "Your biggest spending category this period is transport_grab",
+          "You're doing great! Only used 12% of your budget."
+        ]
+      }
+    },
+    "message": "Analytics calculated for 30d period"
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Invalid period format. Use: 7d, 30d, 90d, or 1y"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to calculate analytics"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Optional Query Parameters:**
+  - `period`: Analytics timeframe (defaults to "30d")
+    - "7d": Last 7 days
+    - "30d": Last 30 days  
+    - "90d": Last 90 days
+    - "1y": Last 1 year
+  
+  **Response Fields Explained:**
+  - `totalSpent`: Total amount spent in cents
+  - `budgetUsed`: Percentage of monthly budget used (assumes RM 500 budget)
+  - `spendingByCategory`: Breakdown by Malaysian expense categories
+  - `insights`: AI-generated spending insights with Malaysian context
+  
+  **Notes:**
+  - Real-time calculations from DynamoDB
+  - Malaysian-specific insights (mamak meal counts, etc.)
+  - Budget percentage assumes RM 500 monthly budget
+  - Categories ranked by spending amount
+  - Perfect for dashboard widgets and spending reports
+  ```
+}

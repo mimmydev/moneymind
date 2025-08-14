@@ -1,0 +1,27 @@
+meta {
+  name: [01] Root
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}
+  body: none
+  auth: none
+}
+
+docs {
+  ## **Environment**
+  
+  ```javascript
+  // Set these in your Bruno environment
+  {
+    "baseUrl": "https://your-api-gateway-id.execute-api.ap-southeast-5.amazonaws.com/dev",
+    "apiPath": "/api"
+  }
+  ```
+  
+  ## **Authentication Notes**
+  - Currently using demo user system
+  - All endpoints support optional `userId` query parameter
+}

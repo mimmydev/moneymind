@@ -1,0 +1,101 @@
+meta {
+  name: Get Single Expenses
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}{{apiPath}}/expenses/:id?date=2025-08-07
+  body: json
+  auth: none
+}
+
+params:query {
+  date: 2025-08-07
+}
+
+params:path {
+  id: exp_1754557705301_2el9ugjzy
+}
+
+docs {
+  ## **GET /api/expenses/{id}**
+  
+  ### Bruno Configuration:
+  - **Method:** GET
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses/:id`
+  - **Path Parameters:**
+    - `id` (string): Expense ID (e.g., "exp_1754627675864_xb6zbswfs")
+  - **Query Parameters (Required):**
+    - `date` (string): Expense date in YYYY-MM-DD format
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "expense": {
+        "description_lowercase": "grab ride to klcc",
+        "id": "exp_1754627675867_z2opea1qh",
+        "userId": "demo-user-malaysia",
+        "description": "Grab ride to KLCC",
+        "amount": 1250,
+        "amountMYR": "RM 12.50",
+        "category": "transport_grab",
+        "date": "2024-08-08",
+        "merchant": "Grab",
+        "paymentMethod": "grabpay",
+        "confidence": 95,
+        "createdAt": "2025-08-08T04:34:35.867Z",
+        "updatedAt": "2025-08-08T04:34:35.867Z"
+      }
+    },
+    "message": "Expense retrieved successfully"
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Date query parameter is required (YYYY-MM-DD format)"
+  }
+  ```
+  
+  ### Error Response (404 - Not Found):
+  ```json
+  {
+    "success": false,
+    "error": "Expense not found"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to get expense"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Path Parameters:**
+  - `id`: The expense ID from expense creation or listing
+  
+  **Required Query Parameters:**
+  - `date`: Expense date (YYYY-MM-DD) - needed for DynamoDB sort key
+  
+  **Response Fields Explained:**
+  - Single expense object with full details
+  - Same structure as expenses array from GET /expenses
+  
+  **Notes:**
+  - Requires both ID and date due to DynamoDB composite key design
+  - Date must match exactly or expense won't be found
+  - Used for expense detail views and edit forms
+  ```
+  
+}

@@ -1,0 +1,105 @@
+meta {
+  name: Create a Single Expense
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}{{apiPath}}/expenses
+  body: none
+  auth: none
+}
+
+docs {
+  ## **POST /api/expenses**
+  
+  ### Bruno Configuration:
+  - **Method:** POST
+  - **URL:** `{{baseUrl}}{{apiPath}}/expenses`
+  - **Headers:**
+    - `Content-Type: application/json`
+  - **Query Parameters (Optional):**
+    - `userId` (string): User ID (default: "demo-user-malaysia")
+  
+  ### Request Body:
+  ```json
+  {
+    "description": "Mamak nasi lemak breakfast",
+    "amount": 450,
+    "date": "2024-08-08",
+    "merchant": "Restoran Mamak",
+    "location": "SS2, Petaling Jaya",
+    "notes": "Extra sambal",
+    "paymentMethod": "cash",
+    "category": "food_mamak"
+  }
+  ```
+  
+  ### Expected Response:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "expense": {
+        "description_lowercase": "mamak nasi lemak breakfast",
+        "id": "exp_1754627675864_abc123def",
+        "userId": "demo-user-malaysia",
+        "description": "Mamak nasi lemak breakfast",
+        "amount": 450,
+        "amountMYR": "RM 4.50",
+        "category": "food_mamak",
+        "date": "2024-08-08",
+        "merchant": "Restoran Mamak",
+        "location": "SS2, Petaling Jaya",
+        "notes": "Extra sambal",
+        "paymentMethod": "cash",
+        "confidence": 100,
+        "createdAt": "2025-08-08T04:34:35.865Z",
+        "updatedAt": "2025-08-08T04:34:35.865Z"
+      }
+    },
+    "message": "Expense created successfully: RM 4.50 for Mamak nasi lemak breakfast"
+  }
+  ```
+  
+  ### Error Response (400 - Bad Request):
+  ```json
+  {
+    "success": false,
+    "error": "Amount must be in cents (integer value). For RM 10.50, send 1050"
+  }
+  ```
+  
+  ### Error Response (500 - Server Error):
+  ```json
+  {
+    "success": false,
+    "error": "Failed to create expense"
+  }
+  ```
+  
+  ### Bruno Documentation:
+  ```markdown
+  **Required Fields:**
+  - `description`: What the expense was for
+  - `amount`: Amount in cents (450 = RM 4.50)
+  
+  **Optional Fields:**
+  - `date`: Expense date (defaults to today if not provided)
+  - `category`: Malaysian category (will auto-categorize if not provided)
+  - `merchant`: Where the expense occurred
+  - `location`: Physical location
+  - `notes`: Additional details
+  - `paymentMethod`: cash, card, grabpay, tng, etc.
+  
+  **Response Fields Explained:**
+  - `confidence`: 100 if category manually set, lower if auto-categorized
+  - Auto-generated unique ID and timestamps
+  
+  **Notes:**
+  - Amount must be integer (cents) - no decimal places
+  - Auto-categorization uses Malaysian merchant patterns
+  - If no category provided, will analyze description for best match
+  ```
+  
+}
