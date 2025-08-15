@@ -1,0 +1,67 @@
+name: Deploy (Nuxt 4 + Bun + PM2)
+
+on:
+  push:
+    branches: ['master'] # change if you deploy from another branch
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚀 SSH into server and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            # === Settings (edit to match your server paths) ===
+            APP_DIR="/var/www/moneymind/frontend/web"           # where your repo lives on the server
+            PM2_APP_NAME="MoneyMind"               # from ecosystem.config.cjs
+            BRANCH="master"                          # which branch to deploy
+
+            # Ensure Bun is on PATH (adjust if you use another shell/profile)
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+            command -v bun >/dev/null || { echo "Bun not found on server PATH"; exit 1; }
+
+            # Go to app directory
+            cd "$APP_DIR"
+
+            # Pull latest code safely
+            git fetch --all --prune
+            git checkout "$BRANCH"
+            git reset --hard "origin/$BRANCH"
+
+            # Install deps & build (Nuxt 4)
+            bun install --no-progress
+
+            # Set frontend env vars for build
+            export VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}"
+            export VITE_API_PATH="${{ secrets.VITE_API_PATH }}"
+
+            # Build Nuxt 4 with env vars
+            bunx nuxi build
+
+            # Make sure logs dir exists (matches ecosystem file)
+            mkdir -p logs
+
+            # Start or reload via PM2
+            if pm2 list | grep -q "$PM2_APP_NAME"; then
+              pm2 reload "$PM2_APP_NAME"
+            else
+              pm2 start ecosystem.config.cjs
+            fi
+
+            # Persist PM2 process list
+            pm2 save
