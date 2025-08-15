@@ -7,8 +7,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
-import type { Expense } from '../services/expenses';
-import { AnalyticsService } from '../services/analytics';
+import type { Expense } from '@/app/services/expenses';
+import { AnalyticsService } from '@/app/services/analyticsService';
+import { colors as designColors, chartColors } from '@/app/lib/design-system';
 
 Chart.register(...registerables);
 
@@ -22,75 +23,13 @@ const props = defineProps<Props>();
 const chartRef = ref<HTMLCanvasElement | null>(null);
 let chartInstance: Chart | null = null;
 
-const aggregateCategoryData = (expenses: Expense[], period: string = '30d') => {
-  if (!expenses || expenses.length === 0) {
-    return { labels: [], data: [], colors: [] };
-  }
-
-  const endDate = new Date();
-  const startDate = new Date();
-
-  switch (period) {
-    case '7d':
-      startDate.setDate(endDate.getDate() - 7);
-      break;
-    case '30d':
-      startDate.setDate(endDate.getDate() - 30);
-      break;
-    case '90d':
-      startDate.setDate(endDate.getDate() - 90);
-      break;
-    case '1y':
-      startDate.setFullYear(endDate.getFullYear() - 1);
-      break;
-    default:
-      startDate.setDate(endDate.getDate() - 30);
-  }
-
-  const startDateStr = startDate.toISOString().split('T')[0];
-  const endDateStr = endDate.toISOString().split('T')[0];
-
-  const filteredExpenses = expenses.filter((expense) => {
-    return (
-      expense.date && expense.category && expense.date >= startDateStr && expense.date <= endDateStr
-    );
-  });
-
-  console.log(`📊 Category Filter for ${period}:`, {
-    requestedRange: `${startDateStr} to ${endDateStr}`,
-    totalExpenses: expenses.length,
-    filteredExpenses: filteredExpenses.length,
-    categories: filteredExpenses.map((e) => e.category),
-  });
-
-  const categoryCounts = new Map<string, number>();
-
-  filteredExpenses.forEach((expense) => {
-    if (expense.category) {
-      const currentCount = categoryCounts.get(expense.category) || 0;
-      categoryCounts.set(expense.category, currentCount + 1);
-    }
-  });
-
-  const labels: string[] = [];
-  const data: number[] = [];
-  const colors: string[] = [];
-
-  const sortedCategories = Array.from(categoryCounts.entries()).sort((a, b) => b[1] - a[1]);
-
-  sortedCategories.forEach(([category, count]) => {
-    labels.push(AnalyticsService.formatCategoryName(category));
-    data.push(count);
-    colors.push(AnalyticsService.getCategoryColor(category));
-  });
-
-  return { labels, data, colors };
-};
-
 const createChart = () => {
   if (!chartRef.value) return;
 
-  const { labels, data, colors } = aggregateCategoryData(props.expenses, props.period || '30d');
+  const { labels, data, colors } = AnalyticsService.processCategoryBreakdownData(
+    props.expenses,
+    props.period || '30d'
+  );
 
   if (chartInstance) {
     chartInstance.destroy();
@@ -104,7 +43,7 @@ const createChart = () => {
         {
           data,
           backgroundColor: colors,
-          borderColor: '#ffffff',
+          borderColor: designColors.background.primary,
           borderWidth: 2,
           hoverBorderWidth: 3,
           hoverBackgroundColor: colors.map((color) => {
@@ -132,7 +71,7 @@ const createChart = () => {
               size: 9,
               family: "'JetBrains Mono', monospace",
             },
-            color: '#6b7280',
+            color: designColors.text.secondary,
             generateLabels: (chart) => {
               const data = chart.data;
               if (data.labels?.length && data.datasets.length) {
@@ -154,10 +93,10 @@ const createChart = () => {
           },
         },
         tooltip: {
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          titleColor: '#ffffff',
-          bodyColor: '#ffffff',
-          borderColor: '#10b981',
+          backgroundColor: chartColors.tooltip.background,
+          titleColor: chartColors.tooltip.title,
+          bodyColor: chartColors.tooltip.body,
+          borderColor: chartColors.tooltip.border,
           borderWidth: 1,
           usePointStyle: true,
           callbacks: {

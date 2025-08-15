@@ -31,27 +31,27 @@
 
     <div v-else-if="analyticsData" style="font-family: 'JetBrains Mono', monospace">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
-        <MetricCard
+        <Dashboard
           title="Total Spent"
           :value="analyticsData.totalSpentMYR"
           icon-class="pi-wallet"
         />
 
-        <MetricCard
+        <Dashboard
           title="Daily Average"
           :value="analyticsData.dailyAverageMYR"
           icon-class="pi-calendar"
         />
 
-        <MetricCard
+        <Dashboard
           title="Transaction"
           :value="analyticsData.transactionCount"
           icon-class="pi-arrow-right-arrow-left"
         />
 
-        <MetricCard
+        <Dashboard
           title="Categories"
-          :value="analyticsData.spendingByCategory.length"
+          :value="analyticsData.categoryBreakdown.length"
           icon-class="pi-arrow-right-arrow-left"
         />
       </div>
@@ -118,10 +118,8 @@
             </thead>
             <tbody>
               <tr
-                v-if="
-                  analyticsData.spendingByCategory && analyticsData.spendingByCategory.length > 0
-                "
-                v-for="category in analyticsData.spendingByCategory"
+                v-if="analyticsData.categoryBreakdown && analyticsData.categoryBreakdown.length > 0"
+                v-for="category in analyticsData.categoryBreakdown"
                 :key="category.name"
                 class="border-b border-gray-100 dark:border-gray-800 text-sm font-extralight"
               >
@@ -129,10 +127,10 @@
                   <div class="flex items-center space-x-3">
                     <div
                       class="w-3 h-3 rounded-full"
-                      :style="{ backgroundColor: getCategoryColor(category.name) }"
+                      :style="{ backgroundColor: getCategoryColorFn(category.name) }"
                     ></div>
                     <span class="font-medium text-gray-900 dark:text-white">{{
-                      formatCategoryName(category.name)
+                      formatCategoryNameFn(category.name)
                     }}</span>
                   </div>
                 </td>
@@ -149,7 +147,7 @@
 
               <tr
                 v-if="
-                  !analyticsData.spendingByCategory || analyticsData.spendingByCategory.length === 0
+                  !analyticsData.categoryBreakdown || analyticsData.categoryBreakdown.length === 0
                 "
               >
                 <td colspan="4" class="py-8 px-4 text-center text-gray-500 dark:text-gray-400">
@@ -170,7 +168,7 @@
       </div>
 
       <div
-        v-for="(insight, index) in analyticsData.insights"
+        v-for="(insight, index) in analyticsData.smartInsights"
         :key="index"
         class="flex items-start space-x-3 mt-1"
       >
@@ -196,74 +194,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import SpendingTrendChart from '../components/SpendingTrendChart.vue';
-import CategoryBreakdownChart from '../components/CategoryBreakdownChart.vue';
-import MetricCard from '../components/MetricCard.vue';
-import { AnalyticsService, type AnalyticsData } from '../services/analytics';
-import { getExpensesByPeriod, type Expense } from '../services/expenses';
+import SpendingTrendChart from '@/app/components/SpendingTrendChart.vue';
+import CategoryBreakdownChart from '@/app/components/CategoryBreakdownChart.vue';
+import Dashboard from '@/app/components/Dashboard.vue';
+import { useAnalytics } from '@/app/composables/useAnalytics';
 
-const loading = ref(true);
-const error = ref<string | null>(null);
-const analyticsData = ref<AnalyticsData | null>(null);
-const expensesData = ref<Expense[]>([]);
-const selectedPeriod = ref('30d');
-const isMounted = ref(false);
-
-const periods = [
-  { value: '7d', label: '7 Days' },
-  { value: '30d', label: '30 Days' },
-  { value: '90d', label: '3 Months' },
-  { value: '1y', label: '1 Year' },
-];
-
-const selectPeriod = (period: string) => {
-  selectedPeriod.value = period;
-  fetchAnalytics();
-};
-
-const fetchAnalytics = async () => {
-  try {
-    loading.value = true;
-    error.value = null;
-
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const [analytics, expenses] = await Promise.all([
-      AnalyticsService.getAnalytics(selectedPeriod.value),
-      getExpensesByPeriod(selectedPeriod.value),
-    ]);
-
-    if (isMounted.value) {
-      analyticsData.value = analytics;
-      expensesData.value = expenses;
-    }
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to fetch analytics';
-    console.error('Error fetching analytics:', err);
-  } finally {
-    if (isMounted.value) {
-      loading.value = false;
-    }
-  }
-};
-
-const formatCategoryName = (category: string) => {
-  return AnalyticsService.formatCategoryName(category);
-};
-
-const getCategoryColor = (category: string) => {
-  return AnalyticsService.getCategoryColor(category);
-};
-
-onMounted(() => {
-  isMounted.value = true;
-  fetchAnalytics();
-});
-
-onUnmounted(() => {
-  isMounted.value = false;
-});
+const {
+  loading,
+  error,
+  analyticsData,
+  expensesData,
+  selectedPeriod,
+  periods,
+  selectPeriod,
+  fetchAnalytics,
+  formatCategoryNameFn,
+  getCategoryColorFn,
+} = useAnalytics();
 </script>
 
 <style scoped></style>
