@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { BarElement, CategoryScale, Chart as ChartJs, Legend, LinearScale, Title, Tooltip, type ChartData, type ChartOptions } from 'chart.js';
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJs,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+  type ChartData,
+  type ChartOptions,
+} from 'chart.js';
 import { Bar } from 'vue-chartjs';
 
 ChartJs.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
@@ -15,7 +25,7 @@ interface ChartProps {
 const props = withDefaults(defineProps<ChartProps>(), {
   chartOptions: undefined,
   yAxisLabel: '',
-  colorVar: '--color-text-primary'
+  colorVar: '--color-text-primary',
 });
 
 const chartRef = ref();
@@ -31,28 +41,26 @@ const dynamicOptions = computed<ChartOptions<'bar'>>(() => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false
-      }
+        display: false,
+      },
     },
     scales: {
       y: {
         beginAtZero: true,
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: 'rgba(255, 255, 255, 0.1)',
         },
         ticks: {
           color,
-          callback: (value) => props.yAxisLabel
-            ? `${props.yAxisLabel}${value}`
-            : String(value)
-        }
+          callback: (value) => (props.yAxisLabel ? `${props.yAxisLabel}${value}` : String(value)),
+        },
       },
       x: {
         grid: { display: false },
-        ticks: { color }
-      }
+        ticks: { color },
+      },
     },
-    ...props.chartOptions
+    ...props.chartOptions,
   };
 });
 
@@ -70,9 +78,5 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <Bar
-    ref="chartRef"
-    :data="chartData"
-    :options="dynamicOptions"
-  />
+  <Bar ref="chartRef" :data="chartData" :options="dynamicOptions" />
 </template>

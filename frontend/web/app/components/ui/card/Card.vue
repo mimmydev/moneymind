@@ -2,14 +2,14 @@
 import { computed } from 'vue';
 
 interface Props {
-    padding?: string
-    hoverable?: boolean
+  padding?: string;
+  hoverable?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    padding: 'p-3',
-    hoverable: false
-})
+  padding: 'p-3',
+  hoverable: false,
+});
 
 const cardClass = computed(() => [
   'rounded-lg bg-card/95 text-card-foreground shadow-lg inline-block w-fit',
@@ -22,7 +22,7 @@ const cardClass = computed(() => [
 </script>
 
 <template>
-    <div :class="cardClass">
-        <slot />
-    </div>
+  <div :class="cardClass">
+    <slot />
+  </div>
 </template>
