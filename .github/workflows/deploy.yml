@@ -1,4 +1,4 @@
-name: Deploy (Nuxt 4 + Bun + PM2)
+name: Deploy MoneyMind
 
 on:
   push:
@@ -12,6 +12,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: env
 
     steps:
       - name: 🚀 SSH into server and deploy
