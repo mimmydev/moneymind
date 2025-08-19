@@ -5,7 +5,7 @@ import { fileURLToPath, URL } from 'node:url';
 export default defineNuxtConfig({
   compatibilityDate: 'latest',
   devtools: { enabled: true },
-  modules: ['@nuxt/ui', 'shadcn-nuxt'],
+  modules: ['@nuxt/ui', 'shadcn-nuxt', '@pinia/nuxt'],
   shadcn: {
     /**
      * Prefix for all the imported component
@@ -17,12 +17,15 @@ export default defineNuxtConfig({
      */
     componentDir: './app/components/ui',
   },
-  css: ['~/assets/css/main.css'],
+  css: ['@/app/assets/css/main.css'],
   vite: {
     plugins: [tailwindcss()],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./', import.meta.url)),
+        '@/app': fileURLToPath(new URL('./app', import.meta.url)),
+        '@/lib': fileURLToPath(new URL('./lib', import.meta.url)),
+        '@/utils': fileURLToPath(new URL('./utils', import.meta.url)),
       },
     },
   },
