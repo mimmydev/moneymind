@@ -11,7 +11,7 @@ const toggleMobileMenu = () => {
 
 const links = [
   { to: '/', label: 'Dashboard', icon: 'prime:objects-column' },
-  { to: '/transactions', label: 'Expenses', icon: 'prime:credit-card' },
+  { to: '/expenses', label: 'Expenses', icon: 'prime:credit-card' },
   { to: '/analytics', label: 'Analytics', icon: 'prime:chart-line' },
 ];
 </script>

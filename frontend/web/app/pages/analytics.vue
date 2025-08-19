@@ -1,14 +1,7 @@
 <template>
-  <div class="bg-gray-50 dark:bg-gray-900 p-4">
-    <div class="mb-5 flex justify-between flex-col lg:flex-row">
-      <div class="flex flex-col">
-        <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white mb-1">ANALYTICS</h1>
-        <p class="text-sm ml-6 text-gray-600 dark:text-gray-300">
-          Turn data into actionable insights
-        </p>
-      </div>
-
-      <div class="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1 gap-1 max-h-12 mt-4 lg:mt-0">
+  <PageContainer title="📈 ANALYTICS" subtitle="Turn data into actionable insights">
+    <template #headerActions>
+      <div class="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1 gap-1 max-h-12">
         <button
           v-for="period in periods"
           :key="period.value"
@@ -23,7 +16,7 @@
           {{ period.label }}
         </button>
       </div>
-    </div>
+    </template>
 
     <div v-if="loading" class="flex justify-center items-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -190,7 +183,7 @@
         Try Again
       </button>
     </div>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
