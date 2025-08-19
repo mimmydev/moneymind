@@ -1,2 +1,2 @@
-import BarChart from "./BarChart.vue";
+import BarChart from './BarChart.vue';
 export { BarChart };

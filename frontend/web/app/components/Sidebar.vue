@@ -11,7 +11,7 @@ const toggleMobileMenu = () => {
 
 const links = [
   { to: '/', label: 'Dashboard', icon: 'prime:objects-column' },
-  { to: '/transactions', label: 'Expenses', icon: 'prime:credit-card' },
+  { to: '/expenses', label: 'Expenses', icon: 'prime:credit-card' },
   { to: '/analytics', label: 'Analytics', icon: 'prime:chart-line' },
 ];
 </script>
@@ -19,12 +19,12 @@ const links = [
 <template>
   <div class="lg:hidden">
     <div
-      class="flex items-center justify-between bg-background/95 backdrop-blur-sm z-50 p-1 shadow-sm shadow-black/10 border-b border-border/10"
+      class="flex items-center justify-between bg-background/95 backdrop-blur-sm z-50 pl-4 pr-8 py-2 shadow-sm shadow-black/10 border-b border-border/10"
     >
-      <img src="/images/Rectangle 1.png" alt="MoneyMind Logo" class="w-36 rounded-sm" />
+      <img src="/images/Logo.webp" alt="MoneyMind Logo" class="w-20 rounded-sm dark:invert" />
       <div class="flex gap-4">
         <ModeToggle />
-        <button @click="toggleMobileMenu" class="mr-8">
+        <button @click="toggleMobileMenu">
           <Icon icon="prime:bars" :ssr="true" />
         </button>
       </div>
@@ -55,15 +55,15 @@ const links = [
     >
       <nav
         v-if="isMobileMenuOpen"
-        class="absolute top-[72px] left-4 right-4 bg-white backdrop-blur-sm border border-border rounded-lg shadow-lg z-50 lg:hidden"
+        class="absolute top-[72px] left-4 right-4 backdrop-blur-sm border border-border rounded-lg shadow-lg z-50 lg:hidden"
       >
-        <div class="p-3 space-y-1">
+        <div class="p-3 space-y-1 bg-background rounded-lg">
           <NuxtLink
             v-for="link in links"
             :key="link.to"
             :to="link.to"
             @click="isMobileMenuOpen = false"
-            class="flex items-center px-4 py-2 text-foreground hover:text-primary hover:bg-accent/60 rounded-xl transition-all duration-300"
+            class="flex items-center px-4 py-2 text-primary hover:text-primary hover:bg-accent/60 rounded-xl transition-all duration-300"
             active-class="text-white font-semibold bg-primary [&>i]:text-white [&>span]:text-white hover:text-white"
           >
             <div
@@ -78,9 +78,13 @@ const links = [
     </Transition>
   </div>
 
-  <aside class="hidden lg:flex h-screen bg-background pr-8 flex-col">
-    <div class="flex flex-col items-center space-y-3">
-      <img src="/images/Rectangle 1.png" alt="MoneyMind Logo" class="lg:w-[244px] lg:h-[119px]" />
+  <aside class="hidden lg:flex h-screen bg-background pr-8 flex-col lg:w-[240px] pt-6">
+    <div class="flex justify-center px-4 mb-4">
+      <img
+        src="/images/Logo.webp"
+        alt="MoneyMind Logo"
+        class="max-w-full w-[160px] object-contain dark:invert"
+      />
     </div>
 
     <nav class="flex-1 p-4">

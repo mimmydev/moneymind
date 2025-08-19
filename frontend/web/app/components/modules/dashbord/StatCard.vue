@@ -8,7 +8,7 @@
       <p class="text-xs font-mono flex items-center gap-1">
         <span class="text-text-secondary">Trend:</span>
         <span :class="trendClass" class="flex items-center gap-1">
-          <Icon :icon="trendIcon" class="text-sm" /> 
+          <Icon :icon="trendIcon" class="text-sm" />
           {{ trendText }}
         </span>
       </p>
@@ -22,27 +22,27 @@ import { Icon } from '@iconify/vue';
 defineProps({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   icon: {
     type: String,
-    required: true
+    required: true,
   },
   value: {
     type: String,
-    required: true
+    required: true,
   },
   trendText: {
     type: String,
-    required: true
+    required: true,
   },
   trendIcon: {
     type: String,
-    default: 'dashicons:arrow-up'
+    default: 'dashicons:arrow-up',
   },
   trendClass: {
     type: String,
-    default: 'text-success'
-  }
+    default: 'text-success',
+  },
 });
 </script>
