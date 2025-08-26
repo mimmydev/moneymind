@@ -66,6 +66,10 @@
 </template>
 
 <script setup lang="ts">
+useHead({
+  title: 'Expenses',
+});
+
 import { ref, computed, onMounted } from 'vue';
 import { Upload, Loader2 } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';

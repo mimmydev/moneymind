@@ -3,6 +3,16 @@ import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineNuxtConfig({
+  app: {
+    head: {
+      titleTemplate: '%s | MoneyMind',
+      title: 'Home',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      ],
+    },
+  },
   compatibilityDate: 'latest',
   devtools: { enabled: true },
   modules: ['@nuxt/ui', 'shadcn-nuxt', '@pinia/nuxt'],
