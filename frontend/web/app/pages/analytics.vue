@@ -187,6 +187,10 @@
 </template>
 
 <script setup lang="ts">
+useHead({
+  title: 'Analytics',
+});
+
 import SpendingTrendChart from '@/app/components/SpendingTrendChart.vue';
 import CategoryBreakdownChart from '@/app/components/CategoryBreakdownChart.vue';
 import Dashboard from '@/app/components/Dashboard.vue';
