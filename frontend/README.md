@@ -37,9 +37,9 @@ moneymind/
 
 ## Available Scripts
 
-- `bun dev`: Start all applications in development mode
+- `bun dev:web`: Start only the web application and development frontend (make sure you are in `frontend` folder)
+- `bun format`: To run formatting and linting
 - `bun build`: Build all applications
-- `bun dev:web`: Start only the web application
 - `bun check-types`: Check TypeScript types across all frontend
 
 ## shadcn-vue Components
