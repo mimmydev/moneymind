@@ -1,6 +1,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { useExpensesStore } from '../stores/useExpensesStore';
-import { deleteExpense } from '../services/expenses';
+import { deleteExpense, updateExpense } from '../services/expenses';
 import type { Expense } from '../services/expenses';
 
 export const useExpenseManagement = () => {
@@ -44,8 +44,27 @@ export const useExpenseManagement = () => {
   };
 
   const handleSaveExpense = async (updatedExpense: Expense) => {
-    await expensesStore.updateExpense(updatedExpense.id, updatedExpense);
-    showEditModal.value = false;
+    if (!selectedExpense.value) {
+      console.error('No selected expense for update');
+      return;
+    }
+
+    try {
+      const updatedData = await updateExpense(
+        updatedExpense.id,
+        selectedExpense.value.date,
+        updatedExpense
+      );
+
+      console.log('✅ handleSaveExpense: Service call successful, updating store...');
+
+      //** Update the store with the response from the API
+      await expensesStore.updateExpense(updatedData.id, updatedData);
+
+      showEditModal.value = false;
+    } catch (error) {
+      console.error('❌ handleSaveExpense: Failed to update expense:', error);
+    }
   };
 
   const handleDeleteConfirmed = async (expense: Expense) => {
@@ -55,7 +74,6 @@ export const useExpenseManagement = () => {
       showDeleteDialog.value = false;
     } catch (error) {
       console.error('Failed to delete expense:', error);
-      // Keep dialog open on error
     }
   };
 

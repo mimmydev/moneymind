@@ -17,12 +17,9 @@ export const useExpensesStore = defineStore('expenses', () => {
   //** Actions
   const fetchExpenses = async (force: boolean = false) => {
     try {
-      console.log('🔄 fetchExpenses: Starting to fetch expenses...');
       isLoading.value = true;
       error.value = null;
-      console.log('🔄 fetchExpenses: isLoading set to true');
 
-      console.log('🔄 fetchExpenses: Calling getExpenses()...');
       expenses.value = await getExpenses();
       console.log(
         '✅ fetchExpenses: Successfully fetched expenses:',
@@ -31,17 +28,22 @@ export const useExpensesStore = defineStore('expenses', () => {
       );
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch expenses';
-      console.error('❌ fetchExpenses: Error fetching expenses:', err);
     } finally {
       isLoading.value = false;
-      console.log('🔄 fetchExpenses: isLoading set to false');
     }
   };
 
   const updateExpense = async (id: string, updates: Partial<Expense>) => {
-    const index = expenses.value.findIndex((e) => e.id === id);
-    if (index !== -1) {
-      expenses.value[index] = { ...expenses.value[index], ...updates } as Expense;
+    try {
+      const index = expenses.value.findIndex((e) => e.id === id);
+      if (index !== -1) {
+        expenses.value[index] = { ...expenses.value[index], ...updates } as Expense;
+      }
+
+      await fetchExpenses();
+    } catch (err) {
+      console.error('❌ updateExpense: Error updating expense:', err);
+      throw err;
     }
   };
 

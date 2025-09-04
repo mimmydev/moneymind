@@ -102,7 +102,7 @@ export const uploadExpenses = async (file: File): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
 
-  // Determine endpoint based on file type
+  //** Determine endpoint based on file type
   const endpoint = file.name.endsWith('.csv') ? '/expenses/csv' : '/expenses/bulk';
 
   const response = await apiClient.post<UploadResponse>(endpoint, formData, {
@@ -119,22 +119,81 @@ interface DeleteResponse {
   message: string;
 }
 
+interface UpdateResponse {
+  success: boolean;
+  data: {
+    expense: Expense;
+  };
+  message: string;
+}
+
+export const updateExpense = async (
+  id: string,
+  originalDate: string,
+  updatedExpense: Partial<Expense>
+): Promise<Expense> => {
+  //** Handle null, undefined, or empty dates
+  if (!originalDate || originalDate === 'null' || originalDate === 'undefined') {
+    throw new Error('Original date is required for expense update');
+  }
+
+  //** Format date to YYYY-MM-DD if it's not already in that format
+  let formattedDate = originalDate;
+  if (originalDate.includes('T')) {
+    //** If it's an ISO string, extract just the date part
+    const datePart = originalDate.split('T')[0];
+    if (datePart) {
+      formattedDate = datePart;
+    }
+  } else if (!originalDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    //** If it's not in YYYY-MM-DD format, try to parse and format it
+    const dateObj = new Date(originalDate);
+    if (!isNaN(dateObj.getTime())) {
+      const isoDatePart = dateObj.toISOString().split('T')[0];
+      if (isoDatePart) {
+        formattedDate = isoDatePart;
+      }
+    }
+  }
+
+  //** Prepare the update payload, converting amount to cents if provided
+  const updatePayload: any = { ...updatedExpense };
+  if (updatePayload.amount !== undefined) {
+    updatePayload.amount = Math.round(updatePayload.amount * 100); //** Convert to cents
+  }
+
+  //** Remove fields that shouldn't be sent in the update request
+  delete updatePayload.id;
+  delete updatePayload.createdAt;
+  delete updatePayload.updatedAt;
+  delete updatePayload.userId;
+  delete updatePayload.description_lowercase;
+  delete updatePayload.confidence;
+  delete updatePayload.amountMYR; //** This will be calculated by the backend
+
+  const response = await apiClient.put<UpdateResponse>(
+    `/expenses/${id}?date=${formattedDate}`,
+    updatePayload
+  );
+  return response.data.data.expense;
+};
+
 export const deleteExpense = async (id: string, date: string): Promise<DeleteResponse> => {
-  // Handle null, undefined, or empty dates
+  //** Handle null, undefined, or empty dates
   if (!date || date === 'null' || date === 'undefined') {
     throw new Error('Date is required for expense deletion');
   }
 
-  // Format date to YYYY-MM-DD if it's not already in that format
+  //** Format date to YYYY-MM-DD if it's not already in that format
   let formattedDate = date;
   if (date.includes('T')) {
-    // If it's an ISO string, extract just the date part
+    //** If it's an ISO string, extract just the date part
     const datePart = date.split('T')[0];
     if (datePart) {
       formattedDate = datePart;
     }
   } else if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    // If it's not in YYYY-MM-DD format, try to parse and format it
+    //** If it's not in YYYY-MM-DD format, try to parse and format it
     const dateObj = new Date(date);
     if (!isNaN(dateObj.getTime())) {
       const isoDatePart = dateObj.toISOString().split('T')[0];
