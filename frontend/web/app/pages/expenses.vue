@@ -7,6 +7,7 @@
         :is-loading="isLoading"
         @upload="handleUpload"
         @row-click="handleViewExpense"
+        @edit-expense="handleEditExpense"
         @delete-expense="handleDeleteExpense"
       />
     </div>
@@ -20,6 +21,7 @@
     <ExpenseEditModal
       v-model:open="showEditModal"
       :expense="selectedExpense"
+      :is-saving="isSaving"
       @save="handleSaveExpense"
     />
 
@@ -70,7 +72,7 @@ useHead({
   title: 'Expenses',
 });
 
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { Upload, Loader2 } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -89,6 +91,8 @@ import ExpenseViewModal from '@/app/components/expenses/ExpenseViewModal.vue';
 import ExpenseEditModal from '@/app/components/expenses/ExpenseEditModal.vue';
 import ExpenseDeleteDialog from '@/app/components/expenses/ExpenseDeleteDialog.vue';
 import { useExpenseManagement } from '@/app/composables/useExpenseManagement';
+import { useExpensesStore } from '@/app/stores/useExpensesStore';
+import { uploadExpenses } from '@/app/services/expenses';
 
 //** Use composable for all expense management logic
 const {
@@ -100,6 +104,7 @@ const {
   showEditModal,
   showDeleteDialog,
   selectedExpense,
+  isSaving,
   handleViewExpense,
   handleEditExpense,
   handleDeleteExpense,
@@ -116,10 +121,10 @@ const searchQuery = ref('');
 
 //** Computed
 const filteredExpenses = computed(() => {
-  if (!searchQuery.value) return expenses;
+  if (!searchQuery.value) return expenses.value;
 
   const query = searchQuery.value.toLowerCase();
-  return expenses.filter(
+  return expenses.value.filter(
     (expense) =>
       expense.description.toLowerCase().includes(query) ||
       expense.merchant.toLowerCase().includes(query) ||
@@ -151,21 +156,14 @@ async function uploadFile() {
   try {
     isUploading.value = true;
 
-    const formData = new FormData();
-    formData.append('file', selectedFile.value);
+    //** Upload file using the service
+    const result = await uploadExpenses(selectedFile.value);
 
-    const endpoint = selectedFile.value.name.endsWith('.csv')
-      ? '/api/expenses/csv'
-      : '/api/expenses/bulk';
+    console.log('Upload successful:', result.message);
+    console.log('Summary:', result.data.summary);
 
-    //** TODO: Implement actual upload API call
-    console.log('Uploading file:', selectedFile.value.name, 'to', endpoint);
-
-    //** Simulate upload delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    //** Reload expenses after upload
-    await fetchExpenses();
+    //** Force reload expenses after upload to ensure UI refreshes
+    await fetchExpenses(true);
 
     //** Reset upload state
     showUploadDialog.value = false;
@@ -175,13 +173,9 @@ async function uploadFile() {
     }
   } catch (error) {
     console.error('Upload failed:', error);
+    //** TODO: Show user-friendly error message
   } finally {
     isUploading.value = false;
   }
 }
-
-//** Lifecycle
-onMounted(() => {
-  fetchExpenses();
-});
 </script>
