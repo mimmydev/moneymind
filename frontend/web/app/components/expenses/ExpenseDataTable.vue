@@ -226,6 +226,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   upload: [];
   rowClick: [expense: Expense];
+  editExpense: [expense: Expense];
   deleteExpense: [expense: Expense];
 }>();
 
@@ -312,7 +313,7 @@ const table = useVueTable({
   },
   meta: {
     onViewExpense: (expense: Expense) => emit('rowClick', expense),
-    onEditExpense: (expense: Expense) => emit('rowClick', expense),
+    onEditExpense: (expense: Expense) => emit('editExpense', expense),
     onDeleteExpense: (expense: Expense) => emit('deleteExpense', expense),
   },
   state: {

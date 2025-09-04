@@ -1,5 +1,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { useExpensesStore } from '../stores/useExpensesStore';
+import { deleteExpense, updateExpense } from '../services/expenses';
 import type { Expense } from '../services/expenses';
 
 export const useExpenseManagement = () => {
@@ -24,6 +25,7 @@ export const useExpenseManagement = () => {
   const showEditModal = ref(false);
   const showDeleteDialog = ref(false);
   const selectedExpense = ref<Expense | null>(null);
+  const isSaving = ref(false);
 
   //** Modal handlers
   const handleViewExpense = (expense: Expense) => {
@@ -43,13 +45,43 @@ export const useExpenseManagement = () => {
   };
 
   const handleSaveExpense = async (updatedExpense: Expense) => {
-    await expensesStore.updateExpense(updatedExpense.id, updatedExpense);
-    showEditModal.value = false;
+    if (!selectedExpense.value) {
+      console.error('No selected expense for update');
+      return;
+    }
+
+    try {
+      isSaving.value = true;
+      console.log('🔄 handleSaveExpense: Starting expense update...');
+
+      const updatedData = await updateExpense(
+        updatedExpense.id,
+        selectedExpense.value.date,
+        updatedExpense
+      );
+
+      console.log('✅ handleSaveExpense: Service call successful, updating store...');
+
+      //** Update the store with the response from the API
+      await expensesStore.updateExpense(updatedData.id, updatedData);
+
+      console.log('✅ handleSaveExpense: Store updated successfully');
+      showEditModal.value = false;
+    } catch (error) {
+      console.error('❌ handleSaveExpense: Failed to update expense:', error);
+    } finally {
+      isSaving.value = false;
+    }
   };
 
   const handleDeleteConfirmed = async (expense: Expense) => {
-    await expensesStore.deleteExpense(expense.id);
-    showDeleteDialog.value = false;
+    try {
+      await deleteExpense(expense.id, expense.date);
+      await expensesStore.deleteExpense(expense.id);
+      showDeleteDialog.value = false;
+    } catch (error) {
+      console.error('Failed to delete expense:', error);
+    }
   };
 
   return {
@@ -65,6 +97,7 @@ export const useExpenseManagement = () => {
     showEditModal,
     showDeleteDialog,
     selectedExpense,
+    isSaving,
 
     //** Handlers
     handleViewExpense,
