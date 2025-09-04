@@ -156,11 +156,8 @@ export const updateExpense = async (
     }
   }
 
-  //** Prepare the update payload, converting amount to cents if provided
+  //** Prepare the update payload (amount is already in cents from the modal)
   const updatePayload: any = { ...updatedExpense };
-  if (updatePayload.amount !== undefined) {
-    updatePayload.amount = Math.round(updatePayload.amount * 100); //** Convert to cents
-  }
 
   //** Remove fields that shouldn't be sent in the update request
   delete updatePayload.id;

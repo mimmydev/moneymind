@@ -21,6 +21,7 @@
     <ExpenseEditModal
       v-model:open="showEditModal"
       :expense="selectedExpense"
+      :is-saving="isSaving"
       @save="handleSaveExpense"
     />
 
@@ -103,6 +104,7 @@ const {
   showEditModal,
   showDeleteDialog,
   selectedExpense,
+  isSaving,
   handleViewExpense,
   handleEditExpense,
   handleDeleteExpense,

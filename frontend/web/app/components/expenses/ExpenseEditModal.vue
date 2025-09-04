@@ -14,7 +14,7 @@
           </div>
           <div class="grid gap-2">
             <Label for="amount">Amount (RM)</Label>
-            <Input id="amount" type="number" step="0.01" v-model="formData.amount" required />
+            <Input id="amount" type="number" step="0.01" v-model="amountForDisplay" required />
           </div>
         </div>
 
@@ -73,9 +73,9 @@
           <Button type="button" variant="outline" @click="$emit('update:open', false)">
             Cancel
           </Button>
-          <Button type="submit" :disabled="isSaving">
-            <Loader2 v-if="isSaving" class="mr-2 h-4 w-4 animate-spin" />
-            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          <Button type="submit" :disabled="props.isSaving">
+            <Loader2 v-if="props.isSaving" class="mr-2 h-4 w-4 animate-spin" />
+            {{ props.isSaving ? 'Saving...' : 'Save Changes' }}
           </Button>
         </DialogFooter>
       </form>
@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { Loader2 } from 'lucide-vue-next';
 
 interface Expense {
@@ -107,6 +107,7 @@ interface Expense {
 interface Props {
   open: boolean;
   expense: Expense | null;
+  isSaving?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -116,7 +117,6 @@ const emit = defineEmits<{
   save: [expense: Expense];
 }>();
 
-const isSaving = ref(false);
 const formData = ref({
   date: '',
   amount: 0,
@@ -125,6 +125,15 @@ const formData = ref({
   category: '',
   paymentMethod: '',
   location: '',
+});
+
+//** Computed property for amount display with proper decimal formatting
+const amountForDisplay = computed({
+  get: () => formData.value.amount.toFixed(2),
+  set: (value: string) => {
+    const numericValue = parseFloat(value) || 0;
+    formData.value.amount = numericValue;
+  },
 });
 
 //** Watch for expense changes to populate form
@@ -156,31 +165,20 @@ watch(
 async function handleSubmit() {
   if (!props.expense) return;
 
-  try {
-    isSaving.value = true;
+  const updatedExpense: Expense = {
+    ...props.expense,
+    date: formData.value.date,
+    amount: Math.round(formData.value.amount * 100), //** Convert to cents
+    amountMYR: `RM ${formData.value.amount.toFixed(2)}`,
+    description: formData.value.description,
+    merchant: formData.value.merchant,
+    category: formData.value.category,
+    paymentMethod: formData.value.paymentMethod,
+    location: formData.value.location || undefined,
+    updatedAt: new Date().toISOString(),
+  };
 
-    const updatedExpense: Expense = {
-      ...props.expense,
-      date: formData.value.date,
-      amount: Math.round(formData.value.amount * 100), //** Convert to cents
-      amountMYR: `RM ${formData.value.amount.toFixed(2)}`,
-      description: formData.value.description,
-      merchant: formData.value.merchant,
-      category: formData.value.category,
-      paymentMethod: formData.value.paymentMethod,
-      location: formData.value.location || undefined,
-      updatedAt: new Date().toISOString(),
-    };
-
-    //** Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    emit('save', updatedExpense);
-    emit('update:open', false);
-  } catch (error) {
-    console.error('Failed to save expense:', error);
-  } finally {
-    isSaving.value = false;
-  }
+  //** Emit the save event - let the parent composable handle the API call
+  emit('save', updatedExpense);
 }
 </script>

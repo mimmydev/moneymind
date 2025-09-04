@@ -25,6 +25,7 @@ export const useExpenseManagement = () => {
   const showEditModal = ref(false);
   const showDeleteDialog = ref(false);
   const selectedExpense = ref<Expense | null>(null);
+  const isSaving = ref(false);
 
   //** Modal handlers
   const handleViewExpense = (expense: Expense) => {
@@ -50,6 +51,9 @@ export const useExpenseManagement = () => {
     }
 
     try {
+      isSaving.value = true;
+      console.log('🔄 handleSaveExpense: Starting expense update...');
+
       const updatedData = await updateExpense(
         updatedExpense.id,
         selectedExpense.value.date,
@@ -61,9 +65,12 @@ export const useExpenseManagement = () => {
       //** Update the store with the response from the API
       await expensesStore.updateExpense(updatedData.id, updatedData);
 
+      console.log('✅ handleSaveExpense: Store updated successfully');
       showEditModal.value = false;
     } catch (error) {
       console.error('❌ handleSaveExpense: Failed to update expense:', error);
+    } finally {
+      isSaving.value = false;
     }
   };
 
@@ -90,6 +97,7 @@ export const useExpenseManagement = () => {
     showEditModal,
     showDeleteDialog,
     selectedExpense,
+    isSaving,
 
     //** Handlers
     handleViewExpense,
