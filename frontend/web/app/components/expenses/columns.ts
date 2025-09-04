@@ -1,9 +1,10 @@
 import type { ColumnDef } from '@tanstack/vue-table';
 import { h } from 'vue';
-import { ArrowUpDown, Eye, Edit, Trash2 } from 'lucide-vue-next';
+import { ArrowUpDown } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
-import type { Expense } from '@/services/expenses';
+import ExpenseRowActions from './ExpenseRowActions.vue';
+import type { Expense } from '../../services/expenses';
 
 //** Define proper types for table meta
 interface TableMeta {
@@ -27,7 +28,16 @@ export const columns: ColumnDef<Expense>[] = [
       );
     },
     cell: ({ row }) => {
-      const date = new Date(row.getValue('date'));
+      const dateValue = row.getValue('date') as string;
+      if (!dateValue || dateValue === 'null' || dateValue === 'undefined') {
+        return h('div', { class: 'font-medium text-sm text-muted-foreground' }, 'Invalid Date');
+      }
+
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) {
+        return h('div', { class: 'font-medium text-sm text-muted-foreground' }, 'Invalid Date');
+      }
+
       return h(
         'div',
         { class: 'font-medium text-sm' },
@@ -172,63 +182,33 @@ export const columns: ColumnDef<Expense>[] = [
   {
     id: 'actions',
     enableHiding: false,
+    header: () => h('div', { class: 'text-left' }, 'Actions'),
     cell: ({ row, table }) => {
       const expense = row.original;
       const meta = table.options.meta as TableMeta;
 
-      return h('div', { class: 'flex items-center justify-end space-x-1' }, [
-        //** View button
-        h(
-          Button,
-          {
-            variant: 'ghost',
-            size: 'sm',
-            class: 'h-8 w-8 p-0 hover:bg-muted',
-            onClick: (e: Event) => {
-              e.stopPropagation();
-              if (meta?.onViewExpense) {
-                meta.onViewExpense(expense);
-              }
-            },
-            title: 'View details',
+      return h(
+        'div',
+        { class: 'flex items-center justify-end' },
+        h(ExpenseRowActions, {
+          expense,
+          onView: (expense: Expense) => {
+            if (meta?.onViewExpense) {
+              meta.onViewExpense(expense);
+            }
           },
-          () => h(Eye, { class: 'h-4 w-4' })
-        ),
-        //** Edit button
-        h(
-          Button,
-          {
-            variant: 'ghost',
-            size: 'sm',
-            class: 'h-8 w-8 p-0 hover:bg-muted',
-            onClick: (e: Event) => {
-              e.stopPropagation();
-              if (meta?.onEditExpense) {
-                meta.onEditExpense(expense);
-              }
-            },
-            title: 'Edit expense',
+          onEdit: (expense: Expense) => {
+            if (meta?.onEditExpense) {
+              meta.onEditExpense(expense);
+            }
           },
-          () => h(Edit, { class: 'h-4 w-4' })
-        ),
-        //** Delete button
-        h(
-          Button,
-          {
-            variant: 'ghost',
-            size: 'sm',
-            class: 'h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive',
-            onClick: (e: Event) => {
-              e.stopPropagation();
-              if (meta?.onDeleteExpense) {
-                meta.onDeleteExpense(expense);
-              }
-            },
-            title: 'Delete expense',
+          onDelete: (expense: Expense) => {
+            if (meta?.onDeleteExpense) {
+              meta.onDeleteExpense(expense);
+            }
           },
-          () => h(Trash2, { class: 'h-4 w-4' })
-        ),
-      ]);
+        })
+      );
     },
   },
 ];

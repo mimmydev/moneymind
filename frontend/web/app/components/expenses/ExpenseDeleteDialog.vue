@@ -39,20 +39,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Loader2 } from 'lucide-vue-next';
-
-interface Expense {
-  id: string;
-  description: string;
-  amount: number;
-  amountMYR: string;
-  category: string;
-  date: string;
-  merchant: string;
-  paymentMethod: string;
-  location?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Expense } from '@/app/services/expenses';
 
 interface Props {
   open: boolean;
@@ -87,7 +74,16 @@ async function handleDelete() {
 }
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-MY', {
+  if (!dateString || dateString === 'null' || dateString === 'undefined') {
+    return 'Invalid Date';
+  }
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date';
+  }
+
+  return date.toLocaleDateString('en-MY', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

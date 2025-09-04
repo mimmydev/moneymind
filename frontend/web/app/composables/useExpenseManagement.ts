@@ -1,5 +1,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { useExpensesStore } from '../stores/useExpensesStore';
+import { deleteExpense } from '../services/expenses';
 import type { Expense } from '../services/expenses';
 
 export const useExpenseManagement = () => {
@@ -48,8 +49,14 @@ export const useExpenseManagement = () => {
   };
 
   const handleDeleteConfirmed = async (expense: Expense) => {
-    await expensesStore.deleteExpense(expense.id);
-    showDeleteDialog.value = false;
+    try {
+      await deleteExpense(expense.id, expense.date);
+      await expensesStore.deleteExpense(expense.id);
+      showDeleteDialog.value = false;
+    } catch (error) {
+      console.error('Failed to delete expense:', error);
+      // Keep dialog open on error
+    }
   };
 
   return {

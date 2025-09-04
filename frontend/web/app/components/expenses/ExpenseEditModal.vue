@@ -90,12 +90,15 @@ import { Loader2 } from 'lucide-vue-next';
 interface Expense {
   id: string;
   description: string;
+  description_lowercase: string;
+  userId: string;
   amount: number;
   amountMYR: string;
   category: string;
   date: string;
   merchant: string;
   paymentMethod: string;
+  confidence: number;
   location?: string;
   createdAt: string;
   updatedAt: string;
@@ -129,8 +132,15 @@ watch(
   () => props.expense,
   (expense) => {
     if (expense) {
+      // Handle invalid or missing dates
+      let formattedDate = '';
+      if (expense.date && expense.date !== 'null' && expense.date !== 'undefined') {
+        // If date contains 'T', extract the date part; otherwise use as-is
+        formattedDate = expense.date.includes('T') ? expense.date.split('T')[0] : expense.date;
+      }
+
       formData.value = {
-        date: expense.date.split('T')[0], //** Convert to YYYY-MM-DD format
+        date: formattedDate, //** Convert to YYYY-MM-DD format with validation
         amount: expense.amount / 100, //** Convert from cents to RM
         description: expense.description,
         merchant: expense.merchant,

@@ -7,6 +7,7 @@
         :is-loading="isLoading"
         @upload="handleUpload"
         @row-click="handleViewExpense"
+        @edit-expense="handleEditExpense"
         @delete-expense="handleDeleteExpense"
       />
     </div>
@@ -90,6 +91,7 @@ import ExpenseEditModal from '@/app/components/expenses/ExpenseEditModal.vue';
 import ExpenseDeleteDialog from '@/app/components/expenses/ExpenseDeleteDialog.vue';
 import { useExpenseManagement } from '@/app/composables/useExpenseManagement';
 import { useExpensesStore } from '@/app/stores/useExpensesStore';
+import { uploadExpenses } from '@/app/services/expenses';
 
 //** Use composable for all expense management logic
 const {
@@ -152,21 +154,14 @@ async function uploadFile() {
   try {
     isUploading.value = true;
 
-    const formData = new FormData();
-    formData.append('file', selectedFile.value);
+    //** Upload file using the service
+    const result = await uploadExpenses(selectedFile.value);
 
-    const endpoint = selectedFile.value.name.endsWith('.csv')
-      ? '/api/expenses/csv'
-      : '/api/expenses/bulk';
+    console.log('Upload successful:', result.message);
+    console.log('Summary:', result.data.summary);
 
-    //** TODO: Implement actual upload API call
-    console.log('Uploading file:', selectedFile.value.name, 'to', endpoint);
-
-    //** Simulate upload delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    //** Reload expenses after upload
-    await fetchExpenses();
+    //** Force reload expenses after upload to ensure UI refreshes
+    await fetchExpenses(true);
 
     //** Reset upload state
     showUploadDialog.value = false;
@@ -176,6 +171,7 @@ async function uploadFile() {
     }
   } catch (error) {
     console.error('Upload failed:', error);
+    //** TODO: Show user-friendly error message
   } finally {
     isUploading.value = false;
   }

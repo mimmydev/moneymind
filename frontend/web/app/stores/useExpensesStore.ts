@@ -15,7 +15,7 @@ export const useExpensesStore = defineStore('expenses', () => {
   );
 
   //** Actions
-  const fetchExpenses = async () => {
+  const fetchExpenses = async (force: boolean = false) => {
     try {
       console.log('🔄 fetchExpenses: Starting to fetch expenses...');
       isLoading.value = true;
