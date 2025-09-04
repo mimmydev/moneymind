@@ -70,7 +70,7 @@ useHead({
   title: 'Expenses',
 });
 
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { Upload, Loader2 } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -89,6 +89,7 @@ import ExpenseViewModal from '@/app/components/expenses/ExpenseViewModal.vue';
 import ExpenseEditModal from '@/app/components/expenses/ExpenseEditModal.vue';
 import ExpenseDeleteDialog from '@/app/components/expenses/ExpenseDeleteDialog.vue';
 import { useExpenseManagement } from '@/app/composables/useExpenseManagement';
+import { useExpensesStore } from '@/app/stores/useExpensesStore';
 
 //** Use composable for all expense management logic
 const {
@@ -116,10 +117,10 @@ const searchQuery = ref('');
 
 //** Computed
 const filteredExpenses = computed(() => {
-  if (!searchQuery.value) return expenses;
+  if (!searchQuery.value) return expenses.value;
 
   const query = searchQuery.value.toLowerCase();
-  return expenses.filter(
+  return expenses.value.filter(
     (expense) =>
       expense.description.toLowerCase().includes(query) ||
       expense.merchant.toLowerCase().includes(query) ||
@@ -179,9 +180,4 @@ async function uploadFile() {
     isUploading.value = false;
   }
 }
-
-//** Lifecycle
-onMounted(() => {
-  fetchExpenses();
-});
 </script>

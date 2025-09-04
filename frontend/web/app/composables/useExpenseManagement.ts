@@ -1,9 +1,23 @@
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useExpensesStore } from '../stores/useExpensesStore';
 import type { Expense } from '../services/expenses';
 
 export const useExpenseManagement = () => {
   const expensesStore = useExpensesStore();
+
+  //** Create a load function that can be awaited
+  const loadExpenses = async () => {
+    await expensesStore.fetchExpenses();
+  };
+
+  //** Auto-load only on client-side mount
+  onMounted(async () => {
+    if (expensesStore.expenses.length === 0) {
+      await loadExpenses();
+    } else {
+      console.log('useExpenseManagement: Skipping - expenses already exist');
+    }
+  });
 
   //** Modal states
   const showViewModal = ref(false);
@@ -39,11 +53,12 @@ export const useExpenseManagement = () => {
   };
 
   return {
-    //** Store access
-    expenses: expensesStore.expenses,
-    isLoading: expensesStore.isLoading,
-    error: expensesStore.error,
+    //** Store access - using computed to ensure reactivity
+    expenses: computed(() => expensesStore.expenses),
+    isLoading: computed(() => expensesStore.isLoading),
+    error: computed(() => expensesStore.error),
     fetchExpenses: expensesStore.fetchExpenses,
+    loadExpenses,
 
     //** Modal states
     showViewModal,

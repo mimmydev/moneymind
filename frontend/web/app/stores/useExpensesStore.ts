@@ -17,14 +17,24 @@ export const useExpensesStore = defineStore('expenses', () => {
   //** Actions
   const fetchExpenses = async () => {
     try {
+      console.log('🔄 fetchExpenses: Starting to fetch expenses...');
       isLoading.value = true;
       error.value = null;
+      console.log('🔄 fetchExpenses: isLoading set to true');
+
+      console.log('🔄 fetchExpenses: Calling getExpenses()...');
       expenses.value = await getExpenses();
+      console.log(
+        '✅ fetchExpenses: Successfully fetched expenses:',
+        expenses.value.length,
+        'expenses'
+      );
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch expenses';
-      console.error('Error fetching expenses:', err);
+      console.error('❌ fetchExpenses: Error fetching expenses:', err);
     } finally {
       isLoading.value = false;
+      console.log('🔄 fetchExpenses: isLoading set to false');
     }
   };
 
